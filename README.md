@@ -34,13 +34,13 @@ LAN (Phase 2) reuses the same engines via a host-authoritative network adapter.
 ## Module Build Status
 
 - [x] Module 0 — Project foundation
-- [ ] Module 1 — Domain models & RuleConfig
-- [ ] Module 2 — Rule Engine (Classic)
-- [ ] Module 3 — Rule Engine (Power)
-- [ ] Module 4 — Game Engine
-- [ ] Module 5 — AI Engine
+- [x] Module 1 — Domain models & RuleConfig
+- [x] Module 2 — Rule Engine (Classic)
+- [x] Module 3 — Rule Engine (Power)
+- [x] Module 4 — Game Engine
+- [x] Module 5 — AI Engine
 - [ ] Module 6 — UI shell polish
-- [ ] Module 7 — Board, tokens, floor dice
+- [x] Module 7 — Board, tokens, floor dice
 - [ ] Module 8 — Animations, audio, haptics
 - [ ] Module 9 — Profile / stats / achievements
 - [ ] Module 10 — Save / resume
