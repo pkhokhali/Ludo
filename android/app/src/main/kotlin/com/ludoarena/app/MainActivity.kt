@@ -1,4 +1,4 @@
-package com.ludoarena.ludo_arena
+package com.ludoarena.app
 
 import io.flutter.embedding.android.FlutterActivity
 
