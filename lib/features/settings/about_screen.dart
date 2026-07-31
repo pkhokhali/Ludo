@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ludo_arena/core/constants/app_constants.dart';
+import 'package:ludo_arena/widgets/common/arena_background.dart';
 import 'package:ludo_arena/widgets/common/glass_card.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -9,28 +10,30 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('About')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: GlassCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppConstants.appName,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                AppConstants.tagline,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Version 1.0.0 (Phase 1 — Offline)\n'
-                'Package: ${AppConstants.packageName}\n\n'
-                'Built with Flutter · Riverpod · Go Router · Hive',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
+      body: ArenaBackground(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: GlassCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppConstants.appName,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                const Text(AppConstants.tagline),
+                const SizedBox(height: 16),
+                Text(
+                  'Version 1.0.0 (Phase 1 — Offline)\n'
+                  'Package: ${AppConstants.packageName}\n\n'
+                  'Built with Flutter · Riverpod · Go Router · Hive\n\n'
+                  'Privacy: see PRIVACY.md in the project repo. '
+                  'Replace with your hosted policy before Play Store launch.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
           ),
         ),
       ),

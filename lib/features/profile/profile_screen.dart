@@ -1,32 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ludo_arena/core/services/providers.dart';
+import 'package:ludo_arena/core/theme/arena_colors.dart';
+import 'package:ludo_arena/widgets/common/arena_background.dart';
 import 'package:ludo_arena/widgets/common/glass_card.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(profileRepositoryProvider).load();
+    final xpNeed = profile.level * 100;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: GlassCard(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircleAvatar(radius: 40, child: Icon(Icons.person, size: 40)),
-              const SizedBox(height: 12),
-              Text('Player_1', style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 8),
-              Text(
-                'Level 1 · 0 XP',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const Divider(height: 28),
-              const _StatRow(label: 'Coins', value: '1,000'),
-              const _StatRow(label: 'Diamonds', value: '50'),
-              const _StatRow(label: 'Achievements', value: '0'),
-            ],
+      body: ArenaBackground(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: GlassCard(
+            glowColor: ArenaColors.gold,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 44,
+                  backgroundColor: ArenaColors.gold.withValues(alpha: 0.25),
+                  child: const Icon(Icons.person, size: 48, color: ArenaColors.gold),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  profile.displayName,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                Text('Level ${profile.level}'),
+                const SizedBox(height: 8),
+                LinearProgressIndicator(
+                  value: (profile.xp / xpNeed).clamp(0.0, 1.0),
+                  color: ArenaColors.gold,
+                  backgroundColor: ArenaColors.surface,
+                ),
+                const SizedBox(height: 4),
+                Text('${profile.xp} / $xpNeed XP'),
+                const Divider(height: 28),
+                _StatRow(label: 'Coins', value: '${profile.coins}'),
+                _StatRow(label: 'Diamonds', value: '${profile.diamonds}'),
+                _StatRow(
+                  label: 'Theme',
+                  value: profile.favoriteThemeId,
+                ),
+              ],
+            ),
           ),
         ),
       ),

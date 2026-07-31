@@ -1,3 +1,4 @@
+export 'achievement.dart';
 export 'board_cell.dart';
 export 'enums.dart';
 export 'game_action.dart';

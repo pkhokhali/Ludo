@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ludo_arena/core/services/providers.dart';
 import 'package:ludo_arena/engine/ai_engine/ai_engine.dart';
 import 'package:ludo_arena/engine/game_engine/game_engine.dart';
 import 'package:ludo_arena/engine/rule_engine/rule_config_providers.dart';
@@ -64,16 +65,39 @@ class GameController extends StateNotifier<GameSession?> {
   Future<void> start(GameConfig gameConfig) async {
     final rules = await _ref.read(ruleConfigRepositoryProvider).load();
     final effective = gameConfig.ruleOverrides ?? rules;
-    _engine = GameEngine(config: effective);
+    _engine = GameEngine(
+      config: effective,
+      onStateChanged: (s) => _ref.read(gameSnapshotRepositoryProvider).save(s),
+    );
     _ai = AiEngine(rules: _engine!.rules);
 
     final initial = GameStateFactory.create(config: gameConfig);
+    await _ref.read(gameSnapshotRepositoryProvider).save(initial);
     state = GameSession(
       state: initial,
       config: gameConfig,
       ruleConfig: effective,
     );
     _scheduleAiIfNeeded();
+  }
+
+  Future<bool> resume() async {
+    final snap = _ref.read(gameSnapshotRepositoryProvider).load();
+    if (snap == null || snap.isFinished) return false;
+    final rules = await _ref.read(ruleConfigRepositoryProvider).load();
+    final effective = snap.config.ruleOverrides ?? rules;
+    _engine = GameEngine(
+      config: effective,
+      onStateChanged: (s) => _ref.read(gameSnapshotRepositoryProvider).save(s),
+    );
+    _ai = AiEngine(rules: _engine!.rules);
+    state = GameSession(
+      state: snap,
+      config: snap.config,
+      ruleConfig: effective,
+    );
+    _scheduleAiIfNeeded();
+    return true;
   }
 
   List<LegalMove> legalMoves() {
@@ -94,19 +118,19 @@ class GameController extends StateNotifier<GameSession?> {
     final player = s.state.players[s.state.currentPlayerIndex];
     if (player.type != PlayerType.human) return;
 
-    // Preview roll with forced path: apply engine roll, then expose face for animation.
     final result = eng.apply(s.state, GameAction.rollDice(playerId: player.id));
     if (!result.isOk) {
       state = s.copyWith(lastError: result.error);
       return;
     }
 
+    await _ref.read(animationEngineProvider).handle(result.events);
+
     final face = result.events
         .map(
           (e) => e.maybeMap(diceRolled: (d) => d.value, orElse: () => null),
         )
-        .whereType<int>()
-        .cast<int>();
+        .whereType<int>();
     final faceValue = face.isEmpty ? null : face.first;
     state = s.copyWith(
       state: result.state,
@@ -115,6 +139,7 @@ class GameController extends StateNotifier<GameSession?> {
       diceRolling: true,
       pendingDiceFace: faceValue,
     );
+    await _maybeFinish(result.state);
   }
 
   void finishDiceAnimation() {
@@ -124,7 +149,7 @@ class GameController extends StateNotifier<GameSession?> {
     _scheduleAiIfNeeded();
   }
 
-  void moveToken(String tokenId) {
+  Future<void> moveToken(String tokenId) async {
     final s = state;
     final eng = _engine;
     if (s == null || eng == null) return;
@@ -139,12 +164,42 @@ class GameController extends StateNotifier<GameSession?> {
       state = s.copyWith(lastError: result.error);
       return;
     }
+    await _ref.read(animationEngineProvider).handle(result.events);
     state = s.copyWith(
       state: result.state,
       lastEvents: result.events,
       clearError: true,
     );
-    _scheduleAiIfNeeded();
+    await _maybeFinish(result.state);
+    if (!result.state.isFinished) _scheduleAiIfNeeded();
+  }
+
+  Future<void> _maybeFinish(GameState next) async {
+    if (!next.isFinished) return;
+    await _ref.read(gameSnapshotRepositoryProvider).clear();
+
+    final human = next.players.where((p) => p.type == PlayerType.human);
+    final won = human.any((p) => p.id == next.winnerPlayerId) ||
+        (human.isNotEmpty && next.finishOrder.contains(human.first.id));
+    final captures = human.fold<int>(0, (a, p) => a + p.captures);
+    final momentum = next.players.fold<int>(0, (a, p) => a + p.momentum);
+
+    final stats = await _ref.read(statisticsRepositoryProvider).recordMatch(
+          won: won,
+          captures: captures,
+          momentumUsed: momentum,
+        );
+    await _ref.read(profileRepositoryProvider).addXp(won ? 50 : 15);
+    await _ref.read(profileRepositoryProvider).addCoins(won ? 100 : 25);
+    await _ref.read(achievementsRepositoryProvider).evaluate(
+          wins: stats.wins,
+          captures: stats.captures,
+          streak: stats.currentWinningStreak,
+          momentumUsage: stats.momentumUsage,
+        );
+
+    final prefs = _ref.read(preferencesServiceProvider);
+    await prefs.incrementMatchesSinceLastAd();
   }
 
   void _scheduleAiIfNeeded() {
@@ -158,18 +213,20 @@ class GameController extends StateNotifier<GameSession?> {
     if (player.type != PlayerType.ai) return;
 
     final difficulty = player.aiDifficulty ?? AiDifficulty.medium;
-    _aiTimer = Timer(const Duration(milliseconds: 700), () {
+    _aiTimer = Timer(const Duration(milliseconds: 700), () async {
       final current = state;
       if (current == null) return;
       final action = ai.decide(current.state, difficulty);
       if (action == null) return;
       final result = eng.apply(current.state, action);
       if (!result.isOk) return;
+      await _ref.read(animationEngineProvider).handle(result.events);
       state = current.copyWith(
         state: result.state,
         lastEvents: result.events,
         clearError: true,
       );
+      await _maybeFinish(result.state);
       if (!result.state.isFinished) {
         _scheduleAiIfNeeded();
       }

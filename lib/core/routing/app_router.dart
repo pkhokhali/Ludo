@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ludo_arena/core/routing/app_routes.dart';
+import 'package:ludo_arena/features/achievements/achievements_screen.dart';
 import 'package:ludo_arena/features/game/gameplay_screen.dart';
 import 'package:ludo_arena/features/game/mode_screen.dart';
 import 'package:ludo_arena/features/game/result_placeholder_screen.dart';
@@ -47,7 +48,7 @@ GoRouter createAppRouter() {
       ),
       GoRoute(
         path: AppRoutes.result,
-        builder: (context, state) => const ResultPlaceholderScreen(),
+        builder: (context, state) => const ResultScreen(),
       ),
       GoRoute(
         path: AppRoutes.profile,
@@ -56,6 +57,10 @@ GoRouter createAppRouter() {
       GoRoute(
         path: AppRoutes.statistics,
         builder: (context, state) => const StatisticsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.achievements,
+        builder: (context, state) => const AchievementsScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,

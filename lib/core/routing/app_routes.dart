@@ -12,6 +12,7 @@ abstract final class AppRoutes {
   static const String settings = '/settings';
   static const String help = '/help';
   static const String about = '/about';
+  static const String achievements = '/achievements';
 
   static String gamePath(String id) => '/game/$id';
 }
