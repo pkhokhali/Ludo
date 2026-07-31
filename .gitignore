@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local Hive test artifacts
+widget_test_hive/
+test_hive_tmp/
