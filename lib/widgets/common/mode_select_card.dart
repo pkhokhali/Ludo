@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ludo_arena/core/theme/arena_colors.dart';
 import 'package:ludo_arena/widgets/common/glass_card.dart';
 
 /// Tappable glass mode row with accent stripe — replaces stock ListTile.

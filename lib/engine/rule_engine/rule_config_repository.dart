@@ -7,8 +7,9 @@ import 'package:ludo_arena/models/rule_config.dart';
 
 /// Loads bundled RuleConfig and merges optional Hive overrides.
 class RuleConfigRepository {
-  RuleConfigRepository({AssetBundle? bundle, this._overrideBox})
-      : _bundle = bundle ?? rootBundle;
+  RuleConfigRepository({AssetBundle? bundle, Box? overrideBox})
+      : _bundle = bundle ?? rootBundle,
+        _overrideBox = overrideBox;
 
   static const String assetPath = 'assets/config/rule_config.json';
   static const String overrideKey = 'rule_config_override';

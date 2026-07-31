@@ -39,7 +39,7 @@ class ResultScreen extends ConsumerWidget {
                     .then()
                     .shimmer(duration: 1200.ms)
               else
-                Icon(
+                const Icon(
                   Icons.sentiment_dissatisfied_rounded,
                   size: 96,
                   color: ArenaColors.textSecondary,
