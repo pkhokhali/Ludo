@@ -58,9 +58,10 @@ flutter run
 ### Download test APK (GitHub Actions)
 
 1. Open **Actions** → **Build APK** on the repo
-2. Open the latest successful run (or click **Run workflow**)
-3. Download the **LudoArena-APK** artifact
-4. Unzip and install `LudoArena-*.apk` on your Android device (enable Install unknown apps)
+2. Wait for a **green** check (not the red failed run)
+3. Scroll to **Artifacts** at the bottom of the run summary
+4. Download **LudoArena-APK** (a `.zip`) — **not** the job logs
+5. Unzip and install `LudoArena-*.apk` on your phone (enable Install unknown apps)
 
 Package ID: `com.ludoarena.app` · Min SDK 24
 
