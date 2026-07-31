@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ludo_arena/core/theme/arena_colors.dart';
 
 /// Builds the dark premium ThemeData for Ludo Arena Classic look.
@@ -18,60 +19,67 @@ ThemeData buildArenaTheme({ArenaThemeId themeId = ArenaThemeId.classic}) {
     onError: ArenaColors.textPrimary,
   );
 
+  final display = GoogleFonts.cinzelTextTheme();
+  final body = GoogleFonts.outfitTextTheme();
+
+  final textTheme = TextTheme(
+    displayLarge: display.displayLarge?.copyWith(
+      color: ArenaColors.textPrimary,
+      fontWeight: FontWeight.w700,
+      fontSize: 40,
+      letterSpacing: 1.2,
+      height: 1.1,
+    ),
+    headlineMedium: display.headlineMedium?.copyWith(
+      color: ArenaColors.textPrimary,
+      fontWeight: FontWeight.w700,
+      fontSize: 24,
+      letterSpacing: 0.6,
+    ),
+    titleLarge: body.titleLarge?.copyWith(
+      color: ArenaColors.textPrimary,
+      fontWeight: FontWeight.w600,
+      fontSize: 18,
+      letterSpacing: 0.2,
+    ),
+    bodyLarge: body.bodyLarge?.copyWith(
+      color: ArenaColors.textPrimary,
+      fontWeight: FontWeight.w400,
+      fontSize: 16,
+    ),
+    bodyMedium: body.bodyMedium?.copyWith(
+      color: ArenaColors.textSecondary,
+      fontWeight: FontWeight.w400,
+      fontSize: 14,
+    ),
+    labelLarge: body.labelLarge?.copyWith(
+      color: ArenaColors.textPrimary,
+      fontWeight: FontWeight.w600,
+      fontSize: 14,
+      letterSpacing: 0.4,
+    ),
+  );
+
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: colorScheme,
     scaffoldBackgroundColor: background,
-    fontFamily: 'Roboto',
+    textTheme: textTheme,
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: TextStyle(
+      titleTextStyle: display.titleLarge?.copyWith(
         color: ArenaColors.textPrimary,
         fontSize: 20,
         fontWeight: FontWeight.w700,
-        letterSpacing: 0.5,
+        letterSpacing: 1.0,
         shadows: [
           Shadow(color: accent.withValues(alpha: 0.45), blurRadius: 12),
         ],
       ),
       iconTheme: IconThemeData(color: accent),
-    ),
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        color: ArenaColors.textPrimary,
-        fontWeight: FontWeight.w800,
-        fontSize: 40,
-        letterSpacing: -0.5,
-      ),
-      headlineMedium: TextStyle(
-        color: ArenaColors.textPrimary,
-        fontWeight: FontWeight.w700,
-        fontSize: 24,
-      ),
-      titleLarge: TextStyle(
-        color: ArenaColors.textPrimary,
-        fontWeight: FontWeight.w600,
-        fontSize: 18,
-      ),
-      bodyLarge: TextStyle(
-        color: ArenaColors.textPrimary,
-        fontWeight: FontWeight.w400,
-        fontSize: 16,
-      ),
-      bodyMedium: TextStyle(
-        color: ArenaColors.textSecondary,
-        fontWeight: FontWeight.w400,
-        fontSize: 14,
-      ),
-      labelLarge: TextStyle(
-        color: ArenaColors.textPrimary,
-        fontWeight: FontWeight.w600,
-        fontSize: 14,
-        letterSpacing: 0.4,
-      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -81,7 +89,7 @@ ThemeData buildArenaTheme({ArenaThemeId themeId = ArenaThemeId.classic}) {
         shadowColor: accent.withValues(alpha: 0.5),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        textStyle: const TextStyle(
+        textStyle: GoogleFonts.outfit(
           fontWeight: FontWeight.w700,
           fontSize: 16,
           letterSpacing: 0.3,
@@ -103,7 +111,7 @@ ThemeData buildArenaTheme({ArenaThemeId themeId = ArenaThemeId.classic}) {
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: ArenaColors.surface,
-      contentTextStyle: const TextStyle(color: ArenaColors.textPrimary),
+      contentTextStyle: GoogleFonts.outfit(color: ArenaColors.textPrimary),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       behavior: SnackBarBehavior.floating,
     ),

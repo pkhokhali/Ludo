@@ -57,12 +57,12 @@ class PremiumButton extends StatelessWidget {
                 ],
                 Text(
                   label,
-                  style: const TextStyle(
-                    color: ArenaColors.backgroundDeep,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                    letterSpacing: 0.4,
-                  ),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: ArenaColors.backgroundDeep,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        letterSpacing: 0.4,
+                      ),
                 ),
               ],
             ),

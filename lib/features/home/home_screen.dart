@@ -10,11 +10,11 @@ import 'package:ludo_arena/core/theme/arena_colors.dart';
 import 'package:ludo_arena/features/game/game_controller.dart';
 import 'package:ludo_arena/models/player_profile.dart';
 import 'package:ludo_arena/widgets/common/arena_background.dart';
+import 'package:ludo_arena/widgets/common/arena_brand_mark.dart';
 import 'package:ludo_arena/widgets/common/glass_card.dart';
-import 'package:ludo_arena/widgets/common/neon_divider.dart';
 import 'package:ludo_arena/widgets/common/premium_button.dart';
 
-/// Main hub — Play, Profile, Stats, Settings + banner ads + resume.
+/// Main hub — brand hero, Play CTA, compact destinations + banner ads.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -59,59 +59,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         cyber: cyber,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.casino, color: ArenaColors.gold, size: 28),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppConstants.appName,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(color: ArenaColors.goldLight),
-                          ),
-                          Text(
-                            'Lv ${profile.level} · ${profile.coins} coins',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
+                    _StatusChip(
+                      icon: Icons.military_tech_rounded,
+                      label: 'Lv ${profile.level}',
                     ),
+                    const SizedBox(width: 8),
+                    _StatusChip(
+                      icon: Icons.monetization_on_rounded,
+                      label: '${profile.coins}',
+                      iconColor: ArenaColors.coin,
+                    ),
+                    const Spacer(),
                     IconButton(
                       onPressed: () => context.push(AppRoutes.settings),
-                      icon: const Icon(Icons.settings, color: ArenaColors.gold),
+                      icon: const Icon(Icons.settings_rounded,
+                          color: ArenaColors.gold),
                     ),
                   ],
                 ),
-                const NeonDivider(),
-                GlassCard(
-                  glowColor: ArenaColors.gold,
+                Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const ArenaBrandMark(size: 96)
+                          .animate()
+                          .fadeIn(duration: 450.ms)
+                          .scale(begin: const Offset(0.85, 0.85)),
+                      const SizedBox(height: 18),
                       Text(
-                        'Ready to play?',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
+                        AppConstants.appName.toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style:
+                            Theme.of(context).textTheme.displayLarge?.copyWith(
+                                  color: ArenaColors.goldLight,
+                                  fontSize: 34,
+                                  letterSpacing: 2.2,
+                                ),
+                      ).animate().fadeIn(delay: 120.ms, duration: 450.ms),
                       const SizedBox(height: 8),
                       Text(
                         AppConstants.tagline,
+                        textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 18),
+                      ).animate().fadeIn(delay: 200.ms, duration: 450.ms),
+                      const SizedBox(height: 28),
                       PremiumButton(
                         label: 'Play Now',
                         icon: Icons.play_arrow_rounded,
                         onPressed: () => context.push(AppRoutes.mode),
-                      ),
+                      )
+                          .animate()
+                          .fadeIn(delay: 280.ms, duration: 400.ms)
+                          .slideY(begin: 0.12, end: 0),
                       if (hasResume) ...[
                         const SizedBox(height: 10),
                         OutlinedButton.icon(
@@ -123,60 +128,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               context.go(AppRoutes.gamePath('resume'));
                             }
                           },
-                          icon: const Icon(Icons.replay),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: ArenaColors.goldLight,
+                            side: BorderSide(
+                              color: ArenaColors.gold.withValues(alpha: 0.55),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 12,
+                            ),
+                          ),
+                          icon: const Icon(Icons.replay_rounded),
                           label: const Text('Resume Last Game'),
                         ),
                       ],
                     ],
                   ),
-                )
-                    .animate()
-                    .fadeIn(duration: 400.ms)
-                    .slideY(begin: 0.08, end: 0),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 1.35,
-                    children: [
-                      _HomeTile(
-                        icon: Icons.person,
-                        label: 'Profile',
-                        onTap: () => context.push(AppRoutes.profile),
-                      ),
-                      _HomeTile(
-                        icon: Icons.bar_chart_rounded,
-                        label: 'Statistics',
-                        onTap: () => context.push(AppRoutes.statistics),
-                      ),
-                      _HomeTile(
-                        icon: Icons.emoji_events_outlined,
-                        label: 'Achievements',
-                        onTap: () => context.push(AppRoutes.achievements),
-                      ),
-                      _HomeTile(
-                        icon: Icons.help_outline,
-                        label: 'Help',
-                        onTap: () => context.push(AppRoutes.help),
-                      ),
-                    ],
-                  ),
                 ),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 1.55,
+                  children: [
+                    _HomeTile(
+                      icon: Icons.person_rounded,
+                      label: 'Profile',
+                      delayMs: 0,
+                      onTap: () => context.push(AppRoutes.profile),
+                    ),
+                    _HomeTile(
+                      icon: Icons.bar_chart_rounded,
+                      label: 'Statistics',
+                      delayMs: 60,
+                      onTap: () => context.push(AppRoutes.statistics),
+                    ),
+                    _HomeTile(
+                      icon: Icons.emoji_events_outlined,
+                      label: 'Achievements',
+                      delayMs: 120,
+                      onTap: () => context.push(AppRoutes.achievements),
+                    ),
+                    _HomeTile(
+                      icon: Icons.help_outline_rounded,
+                      label: 'Help',
+                      delayMs: 180,
+                      onTap: () => context.push(AppRoutes.help),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
                 SizedBox(
-                  height: 54,
+                  height: 50,
                   child: _banner != null
                       ? AdWidget(ad: _banner!)
-                      : Container(
+                      : Align(
                           alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: ArenaColors.surface.withValues(alpha: 0.6),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: ArenaColors.border),
-                          ),
                           child: Text(
-                            'Loading ads…',
+                            ' ',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ),
@@ -190,16 +201,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({
+    required this.icon,
+    required this.label,
+    this.iconColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: ArenaColors.surfaceGlass,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: ArenaColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: iconColor ?? ArenaColors.goldLight),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontSize: 12,
+                  color: ArenaColors.textPrimary,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _HomeTile extends StatelessWidget {
   const _HomeTile({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.delayMs = 0,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final int delayMs;
 
   @override
   Widget build(BuildContext context) {
@@ -211,12 +262,15 @@ class _HomeTile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: ArenaColors.goldLight, size: 32),
-            const SizedBox(height: 10),
+            Icon(icon, color: ArenaColors.goldLight, size: 28),
+            const SizedBox(height: 8),
             Text(label, style: Theme.of(context).textTheme.titleLarge),
           ],
         ),
       ),
-    ).animate().fadeIn(duration: 350.ms);
+    )
+        .animate()
+        .fadeIn(delay: delayMs.ms, duration: 350.ms)
+        .slideY(begin: 0.08, end: 0);
   }
 }

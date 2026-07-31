@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ludo_arena/core/routing/app_routes.dart';
@@ -6,6 +7,7 @@ import 'package:ludo_arena/core/theme/arena_colors.dart';
 import 'package:ludo_arena/features/game/game_controller.dart';
 import 'package:ludo_arena/models/enums.dart';
 import 'package:ludo_arena/models/game_config.dart';
+import 'package:ludo_arena/widgets/common/arena_scaffold.dart';
 import 'package:ludo_arena/widgets/common/glass_card.dart';
 import 'package:ludo_arena/widgets/common/premium_button.dart';
 
@@ -69,38 +71,61 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     context.go(AppRoutes.gamePath('local'));
   }
 
+  String _modeLabel(GameMode mode) => switch (mode) {
+        GameMode.power => 'Power',
+        GameMode.quick => 'Quick',
+        GameMode.ai => 'AI',
+        GameMode.passPlay => 'Pass & Play',
+        GameMode.classic => 'Classic',
+      };
+
   @override
   Widget build(BuildContext context) {
     final modeRaw =
         GoRouterState.of(context).uri.queryParameters['mode'] ?? 'classic';
     final mode = _parseMode(modeRaw);
+    final topPad = MediaQuery.paddingOf(context).top + kToolbarHeight + 12;
 
-    return Scaffold(
-      appBar: AppBar(title: Text('Setup · ${mode.name}')),
+    return ArenaScaffold(
+      title: 'Setup · ${_modeLabel(mode)}',
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.fromLTRB(20, topPad, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             GlassCard(
+              glowColor: ArenaColors.gold,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Players', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 12),
-                  SegmentedButton<int>(
-                    segments: const [
-                      ButtonSegment(value: 2, label: Text('2')),
-                      ButtonSegment(value: 3, label: Text('3')),
-                      ButtonSegment(value: 4, label: Text('4')),
-                    ],
-                    selected: {_players},
-                    onSelectionChanged: (s) =>
-                        setState(() => _players = s.first),
+                  Text(
+                    'Players',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Choose how many seats join the match',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [2, 3, 4].map((count) {
+                      final selected = _players == count;
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: count == 4 ? 0 : 8),
+                          child: _PlayerCountTile(
+                            count: count,
+                            selected: selected,
+                            onTap: () => setState(() => _players = count),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
-            ),
+            ).animate().fadeIn(duration: 360.ms).slideY(begin: 0.06, end: 0),
             const SizedBox(height: 16),
             if (mode == GameMode.ai)
               GlassCard(
@@ -112,36 +137,174 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      children: AiDifficulty.values
-                          .map(
-                            (d) => ChoiceChip(
-                              label: Text(d.name.toUpperCase()),
-                              selected: _difficulty == d,
-                              selectedColor:
-                                  ArenaColors.gold.withValues(alpha: 0.35),
-                              onSelected: (_) =>
-                                  setState(() => _difficulty = d),
+                    Row(
+                      children: AiDifficulty.values.map((d) {
+                        final selected = _difficulty == d;
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: d == AiDifficulty.values.last ? 0 : 8,
                             ),
-                          )
-                          .toList(),
+                            child: _DifficultyChip(
+                              label: d.name.toUpperCase(),
+                              selected: selected,
+                              onTap: () => setState(() => _difficulty = d),
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
-              ),
+              )
+                  .animate()
+                  .fadeIn(delay: 80.ms, duration: 360.ms)
+                  .slideY(begin: 0.06, end: 0),
             const Spacer(),
             OutlinedButton(
               onPressed: () => context.push(AppRoutes.rules),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: ArenaColors.goldLight,
+                side: BorderSide(
+                  color: ArenaColors.gold.withValues(alpha: 0.5),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
               child: const Text('Rule Settings'),
             ),
             const SizedBox(height: 12),
             PremiumButton(
               label: 'Start Match',
-              icon: Icons.sports_esports,
+              icon: Icons.sports_esports_rounded,
               onPressed: () => _start(mode),
-            ),
+            ).animate().fadeIn(delay: 140.ms, duration: 400.ms),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlayerCountTile extends StatelessWidget {
+  const _PlayerCountTile({
+    required this.count,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final int count;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final seats = PlayerColors.seats.take(count).toList();
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: selected
+                ? ArenaColors.gold.withValues(alpha: 0.18)
+                : ArenaColors.surface.withValues(alpha: 0.45),
+            border: Border.all(
+              color: selected ? ArenaColors.gold : ArenaColors.border,
+              width: selected ? 1.6 : 1,
+            ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: ArenaColors.gold.withValues(alpha: 0.28),
+                      blurRadius: 12,
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            children: [
+              Text(
+                '$count',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: selected
+                          ? ArenaColors.goldLight
+                          : ArenaColors.textPrimary,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: seats
+                    .map(
+                      (c) => Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          color: c,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: c.withValues(alpha: 0.5),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DifficultyChip extends StatelessWidget {
+  const _DifficultyChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: selected
+                ? ArenaColors.gold.withValues(alpha: 0.28)
+                : ArenaColors.surface.withValues(alpha: 0.4),
+            border: Border.all(
+              color: selected ? ArenaColors.gold : ArenaColors.border,
+            ),
+          ),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: selected
+                      ? ArenaColors.goldLight
+                      : ArenaColors.textSecondary,
+                ),
+          ),
         ),
       ),
     );

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo_arena/core/services/providers.dart';
-import 'package:ludo_arena/widgets/common/arena_background.dart';
+import 'package:ludo_arena/core/theme/arena_colors.dart';
+import 'package:ludo_arena/widgets/common/arena_scaffold.dart';
 import 'package:ludo_arena/widgets/common/glass_card.dart';
 
 class StatisticsScreen extends ConsumerWidget {
@@ -15,45 +17,53 @@ class StatisticsScreen extends ConsumerWidget {
         : '${(s.winRate * 100).toStringAsFixed(0)}%';
 
     final rows = [
-      ('Games Played', '${s.gamesPlayed}'),
-      ('Wins', '${s.wins}'),
-      ('Losses', '${s.losses}'),
-      ('Win Rate', rate),
-      ('Captures', '${s.captures}'),
-      ('Longest Winning Streak', '${s.longestWinningStreak}'),
-      ('Momentum Usage', '${s.momentumUsage}'),
-      ('Favorite Theme', s.favoriteThemeId),
+      (Icons.sports_esports_rounded, 'Games Played', '${s.gamesPlayed}'),
+      (Icons.emoji_events_rounded, 'Wins', '${s.wins}'),
+      (Icons.close_rounded, 'Losses', '${s.losses}'),
+      (Icons.percent_rounded, 'Win Rate', rate),
+      (Icons.gps_fixed_rounded, 'Captures', '${s.captures}'),
+      (Icons.local_fire_department_rounded, 'Longest Streak',
+          '${s.longestWinningStreak}'),
+      (Icons.bolt_rounded, 'Momentum Usage', '${s.momentumUsage}'),
+      (Icons.palette_outlined, 'Favorite Theme', s.favoriteThemeId),
     ];
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Statistics')),
-      body: ArenaBackground(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            GlassCard(
-              child: Column(
-                children: rows
-                    .map(
-                      (r) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(r.$1),
-                            Text(
-                              r.$2,
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                          ],
+    final topPad = MediaQuery.paddingOf(context).top + kToolbarHeight + 12;
+
+    return ArenaScaffold(
+      title: 'Statistics',
+      body: ListView(
+        padding: EdgeInsets.fromLTRB(20, topPad, 20, 24),
+        children: [
+          GlassCard(
+            glowColor: ArenaColors.gold,
+            child: Column(
+              children: [
+                for (var i = 0; i < rows.length; i++) ...[
+                  if (i > 0)
+                    Divider(
+                      height: 1,
+                      color: ArenaColors.border.withValues(alpha: 0.6),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      children: [
+                        Icon(rows[i].$1, size: 20, color: ArenaColors.goldLight),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text(rows[i].$2)),
+                        Text(
+                          rows[i].$3,
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                      ),
-                    )
-                    .toList(),
-              ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
-        ),
+          ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0),
+        ],
       ),
     );
   }

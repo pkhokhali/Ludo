@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ludo_arena/core/constants/app_constants.dart';
 import 'package:ludo_arena/core/routing/app_routes.dart';
+import 'package:ludo_arena/core/services/providers.dart';
 import 'package:ludo_arena/core/theme/arena_colors.dart';
+import 'package:ludo_arena/widgets/common/arena_background.dart';
+import 'package:ludo_arena/widgets/common/arena_brand_mark.dart';
 
 /// Brand splash — navigates to Home after intro animation.
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -28,62 +32,45 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cyber = ref.watch(themeIdProvider) == ArenaThemeId.cyberNeon;
+
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              ArenaColors.backgroundDeep,
-              ArenaColors.background,
-              Color(0xFF1A0A2E),
-            ],
-          ),
-        ),
+      body: ArenaBackground(
+        cyber: cyber,
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 110,
-                height: 110,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [ArenaColors.goldLight, ArenaColors.goldDark],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: ArenaColors.gold.withValues(alpha: 0.55),
-                      blurRadius: 28,
-                      spreadRadius: 2,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const ArenaBrandMark(size: 128)
+                    .animate()
+                    .fadeIn(duration: 600.ms)
+                    .scale(begin: const Offset(0.72, 0.72))
+                    .then()
+                    .shimmer(
+                      duration: 1400.ms,
+                      color: ArenaColors.goldLight.withValues(alpha: 0.35),
                     ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.casino,
-                  size: 56,
-                  color: ArenaColors.backgroundDeep,
-                ),
-              )
-                  .animate()
-                  .fadeIn(duration: 600.ms)
-                  .scale(begin: const Offset(0.7, 0.7)),
-              const SizedBox(height: 28),
-              Text(
-                AppConstants.appName,
-                style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                      color: ArenaColors.goldLight,
-                    ),
-              ).animate().fadeIn(delay: 200.ms, duration: 500.ms),
-              const SizedBox(height: 10),
-              Text(
-                AppConstants.tagline,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ).animate().fadeIn(delay: 400.ms, duration: 500.ms),
-            ],
+                const SizedBox(height: 32),
+                Text(
+                  AppConstants.appName.toUpperCase(),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        color: ArenaColors.goldLight,
+                        fontSize: 42,
+                        letterSpacing: 2.4,
+                      ),
+                ).animate().fadeIn(delay: 220.ms, duration: 520.ms),
+                const SizedBox(height: 12),
+                Text(
+                  AppConstants.tagline,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        letterSpacing: 0.4,
+                      ),
+                ).animate().fadeIn(delay: 420.ms, duration: 520.ms),
+              ],
+            ),
           ),
         ),
       ),
