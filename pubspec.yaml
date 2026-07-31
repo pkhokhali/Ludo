@@ -1,0 +1,66 @@
+name: ludo_arena
+description: "Ludo Arena — The Next Generation Ludo Experience"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Navigation
+  go_router: ^15.1.2
+
+  # Local storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.5.3
+
+  # Animation
+  flutter_animate: ^4.5.2
+  lottie: ^3.3.1
+  rive: ^0.13.20
+
+  # Audio
+  just_audio: ^0.9.46
+
+  # Ads
+  google_mobile_ads: ^5.3.1
+
+  # Models / serialization
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # Icons / SVG
+  flutter_svg: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.15
+  freezed: ^2.5.8
+  json_serializable: ^6.9.5
+  # hive_generator omitted — incompatible with freezed 2.5+/source_gen 2.
+  # Persist Freezed models as JSON strings in Hive boxes (Module 10).
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/config/
+    - assets/reference/
+    - assets/sounds/
+    - assets/animations/
+    - assets/images/
+    - assets/tokens/
+    - assets/boards/
+    - assets/particles/

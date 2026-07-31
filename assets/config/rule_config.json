@@ -1,0 +1,44 @@
+{
+  "_comment": "Default RuleConfig — engines read this at runtime (Module 1–3). Do not hardcode rules in Dart.",
+  "classic": {
+    "unlockRoll": 6,
+    "extraTurnOnSix": true,
+    "threeSixesRule": true,
+    "exactFinish": true,
+    "captureEnabled": true,
+    "safeCells": [1, 9, 14, 22, 27, 35, 40, 48]
+  },
+  "power": {
+    "enabled": true,
+    "momentumMax": 10,
+    "earn": {
+      "capture": 2,
+      "reachHome": 3,
+      "completeLap": 2,
+      "safeStar": 1,
+      "destroyShield": 3
+    },
+    "spend": {
+      "reverseMove": 2,
+      "shield": 3,
+      "goldenDice": 4,
+      "breakBlockade": 3,
+      "doubleMove": 3,
+      "safeLanding": 2,
+      "momentumBoost": 2,
+      "reRoll": 2
+    },
+    "features": {
+      "shield": true,
+      "portal": true,
+      "goldenDice": true,
+      "comboBonus": true,
+      "momentum": true,
+      "reverseMovement": true,
+      "breakBlockade": true,
+      "safeLanding": true,
+      "doubleMove": true,
+      "momentumBoost": true
+    }
+  }
+}
