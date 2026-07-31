@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ludo_arena/core/routing/app_routes.dart';
+import 'package:ludo_arena/core/services/providers.dart';
 import 'package:ludo_arena/core/theme/arena_colors.dart';
 import 'package:ludo_arena/features/game/game_controller.dart';
 import 'package:ludo_arena/models/enums.dart';
@@ -9,6 +11,9 @@ import 'package:ludo_arena/models/game_state.dart';
 import 'package:ludo_arena/models/token.dart';
 import 'package:ludo_arena/widgets/board/board_layout.dart';
 import 'package:ludo_arena/widgets/board/board_painter.dart';
+import 'package:ludo_arena/widgets/common/arena_background.dart';
+import 'package:ludo_arena/widgets/common/glass_card.dart';
+import 'package:ludo_arena/widgets/common/premium_button.dart';
 import 'package:ludo_arena/widgets/dice/floor_dice_widget.dart';
 import 'package:ludo_arena/widgets/hud/player_card.dart';
 import 'package:ludo_arena/widgets/hud/turn_banner.dart';
@@ -62,7 +67,8 @@ class _GameplayScreenState extends ConsumerState<GameplayScreen>
         BoardLayout.yardPedestal(seat, 0) + const Offset(2.5, -1),
         boardSize.shortestSide,
       );
-      final to = BoardLayout.toPixel(const Offset(7, 7.8), boardSize.shortestSide);
+      final to =
+          BoardLayout.toPixel(const Offset(7, 7.8), boardSize.shortestSide);
       setState(() {
         _diceVisible = true;
         _dicePos = from;
@@ -76,19 +82,29 @@ class _GameplayScreenState extends ConsumerState<GameplayScreen>
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(gameControllerProvider);
+    final cyber = ref.watch(themeIdProvider) == ArenaThemeId.cyberNeon;
 
     if (session == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: ArenaColors.gold)),
+      return Scaffold(
+        body: ArenaBackground(
+          cyber: cyber,
+          child: const Center(
+            child: CircularProgressIndicator(color: ArenaColors.gold),
+          ),
+        ),
       );
     }
 
     final gs = session.state;
     final player = gs.players[gs.currentPlayerIndex];
-    final legalIds = {
-      for (final m in ref.read(gameControllerProvider.notifier).legalMoves())
-        m.token.id,
+    final moves = ref.read(gameControllerProvider.notifier).legalMoves();
+    final legalIds = {for (final m in moves) m.token.id};
+    final highlightCells = {
+      for (final m in moves)
+        if (m.toStatus == TokenStatus.onBoard) m.toPosition,
     };
+    final awaitingRoll =
+        gs.phase == GamePhase.rolling && player.type == PlayerType.human;
 
     if (gs.isFinished) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -97,46 +113,36 @@ class _GameplayScreenState extends ConsumerState<GameplayScreen>
     }
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              ArenaColors.backgroundDeep,
-              ArenaColors.background,
-              Color(0xFF152238),
-            ],
-          ),
-        ),
+      body: ArenaBackground(
+        cyber: cyber,
         child: SafeArea(
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 child: Row(
                   children: [
-                    IconButton(
+                    _HudIconButton(
+                      icon: Icons.pause_rounded,
                       onPressed: () => _showPause(context),
-                      icon: const Icon(Icons.pause, color: ArenaColors.gold),
                     ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: TurnBanner(
                         playerName: player.name,
                         seat: player.seat,
                       ),
                     ),
-                    Text(
-                      gs.lastDiceValue != null ? '🎲 ${gs.lastDiceValue}' : '',
-                      style: const TextStyle(color: ArenaColors.textSecondary),
-                    ),
+                    const SizedBox(width: 8),
+                    DiceHudBadge(value: gs.lastDiceValue),
                   ],
                 ),
               ),
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final side = constraints.biggest.shortestSide * 0.96;
+                    final side = constraints.biggest.shortestSide * 0.98;
                     final boardSize = Size(side, side);
                     return Center(
                       child: SizedBox(
@@ -146,50 +152,57 @@ class _GameplayScreenState extends ConsumerState<GameplayScreen>
                           behavior: HitTestBehavior.opaque,
                           onTap: () => _onBoardTap(session, boardSize),
                           child: Stack(
+                            clipBehavior: Clip.none,
                             children: [
                               RepaintBoundary(
                                 child: CustomPaint(
                                   size: boardSize,
                                   painter: BoardPainter(
-                                    safeCells: session.ruleConfig.classic.safeCells
+                                    safeCells: session
+                                        .ruleConfig.classic.safeCells
                                         .toSet(),
+                                    highlightedCells: highlightCells,
                                   ),
                                 ),
                               ),
                               ..._tokenWidgets(gs, boardSize, legalIds),
                               if (_diceVisible)
                                 Positioned(
-                                  left: _dice.rolling ? _dice.position.dx - 24 : _dicePos.dx - 24,
-                                  top: _dice.rolling ? _dice.position.dy - 24 : _dicePos.dy - 24,
+                                  left: (_dice.rolling
+                                          ? _dice.position.dx
+                                          : _dicePos.dx) -
+                                      24,
+                                  top: (_dice.rolling
+                                          ? _dice.position.dy
+                                          : _dicePos.dy) -
+                                      24,
                                   child: FloorDiceWidget(
                                     value: _dice.face,
                                     rolling: _dice.rolling,
-                                    size: 48,
+                                    size: 54,
                                   ),
                                 ),
-                              // Corner player cards
-                              ..._playerCards(gs),
-                              if (gs.phase == GamePhase.rolling &&
-                                  player.type == PlayerType.human)
+                              if (awaitingRoll && !_dice.rolling)
                                 Positioned(
                                   left: 0,
                                   right: 0,
-                                  bottom: 12,
+                                  bottom: 10,
                                   child: Center(
-                                    child: Text(
-                                      'Tap the board to roll',
-                                      style: TextStyle(
-                                        color: ArenaColors.goldLight
-                                            .withValues(alpha: 0.9),
-                                        fontWeight: FontWeight.w600,
-                                        shadows: const [
-                                          Shadow(
-                                            color: Colors.black54,
-                                            blurRadius: 6,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                    child: _RollHint()
+                                        .animate(
+                                          onPlay: (c) =>
+                                              c.repeat(reverse: true),
+                                        )
+                                        .fade(
+                                          begin: 0.55,
+                                          end: 1,
+                                          duration: 900.ms,
+                                        )
+                                        .scale(
+                                          begin: const Offset(0.98, 0.98),
+                                          end: const Offset(1.02, 1.02),
+                                          duration: 900.ms,
+                                        ),
                                   ),
                                 ),
                             ],
@@ -201,16 +214,46 @@ class _GameplayScreenState extends ConsumerState<GameplayScreen>
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
+                child: SizedBox(
+                  height: 56,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: gs.players.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (context, i) {
+                      final p = gs.players[i];
+                      return SizedBox(
+                        width: (MediaQuery.sizeOf(context).width - 40) /
+                            gs.players.length.clamp(2, 4),
+                        child: PlayerCard(
+                          player: p,
+                          active: i == gs.currentPlayerIndex,
+                          compact: true,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    const _ActionChip(icon: Icons.emoji_emotions_outlined, label: 'Emoji'),
-                    const _ActionChip(icon: Icons.chat_bubble_outline, label: 'Chat'),
-                    _ActionChip(
-                      icon: Icons.exit_to_app,
-                      label: 'Exit',
-                      onTap: () => context.go(AppRoutes.home),
+                    Expanded(
+                      child: _BottomAction(
+                        icon: Icons.menu_book_rounded,
+                        label: 'Rules',
+                        onTap: () => context.push(AppRoutes.rules),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _BottomAction(
+                        icon: Icons.home_rounded,
+                        label: 'Exit',
+                        onTap: () => _showPause(context),
+                      ),
                     ),
                   ],
                 ),
@@ -245,8 +288,9 @@ class _GameplayScreenState extends ConsumerState<GameplayScreen>
             size: tokenSize,
             selected: selected,
             onTap: selected
-                ? () =>
-                    ref.read(gameControllerProvider.notifier).moveToken(token.id)
+                ? () => ref
+                    .read(gameControllerProvider.notifier)
+                    .moveToken(token.id)
                 : null,
           ),
         ),
@@ -265,47 +309,113 @@ class _GameplayScreenState extends ConsumerState<GameplayScreen>
     };
   }
 
-  List<Widget> _playerCards(GameState gs) {
-    final cards = <Widget>[];
-    for (var i = 0; i < gs.players.length; i++) {
-      final p = gs.players[i];
-      final active = i == gs.currentPlayerIndex;
-      final alignment = switch (p.seat) {
-        PlayerSeat.red => Alignment.bottomLeft,
-        PlayerSeat.blue => Alignment.topLeft,
-        PlayerSeat.yellow => Alignment.topRight,
-        PlayerSeat.green => Alignment.bottomRight,
-      };
-      cards.add(
-        Align(
-          alignment: alignment,
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: PlayerCard(player: p, active: active),
-          ),
-        ),
-      );
-    }
-    return cards;
-  }
-
   void _showPause(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: ArenaColors.surface,
-        title: const Text('Paused'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Resume'),
+      barrierColor: Colors.black54,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GlassCard(
+          glowColor: ArenaColors.gold,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Paused',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: ArenaColors.goldLight,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Match is on hold',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 22),
+              PremiumButton(
+                label: 'Resume',
+                icon: Icons.play_arrow_rounded,
+                onPressed: () => Navigator.pop(ctx),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  context.go(AppRoutes.home);
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: ArenaColors.goldLight,
+                  side: BorderSide(
+                    color: ArenaColors.gold.withValues(alpha: 0.5),
+                  ),
+                  minimumSize: const Size(double.infinity, 46),
+                ),
+                child: const Text('Exit to Home'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.go(AppRoutes.home);
-            },
-            child: const Text('Exit'),
+        ),
+      ),
+    );
+  }
+}
+
+class _HudIconButton extends StatelessWidget {
+  const _HudIconButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: ArenaColors.surfaceGlass,
+      shape: const CircleBorder(
+        side: BorderSide(color: ArenaColors.border),
+      ),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(icon, color: ArenaColors.gold, size: 22),
+        ),
+      ),
+    );
+  }
+}
+
+class _RollHint extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: ArenaColors.backgroundDeep.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: ArenaColors.gold.withValues(alpha: 0.55)),
+        boxShadow: [
+          BoxShadow(
+            color: ArenaColors.gold.withValues(alpha: 0.25),
+            blurRadius: 12,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.touch_app_rounded,
+            size: 18,
+            color: ArenaColors.goldLight.withValues(alpha: 0.95),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Tap board to roll',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: ArenaColors.goldLight,
+                  fontWeight: FontWeight.w700,
+                ),
           ),
         ],
       ),
@@ -313,27 +423,41 @@ class _GameplayScreenState extends ConsumerState<GameplayScreen>
   }
 }
 
-class _ActionChip extends StatelessWidget {
-  const _ActionChip({required this.icon, required this.label, this.onTap});
+class _BottomAction extends StatelessWidget {
+  const _BottomAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
   final IconData icon;
   final String label;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            backgroundColor: ArenaColors.surface,
-            child: Icon(icon, color: ArenaColors.goldLight, size: 20),
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      borderRadius: 16,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: ArenaColors.goldLight, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: ArenaColors.textPrimary,
+                    ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
-        ],
+        ),
       ),
     );
   }
