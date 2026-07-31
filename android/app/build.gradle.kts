@@ -24,9 +24,11 @@ android {
 
     buildTypes {
         release {
+            // Debug keystore for sideload testing. Minify off until Play signing —
+            // R8 was stripping WorkManager/Room and crashing on launch with AdMob.
             signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
