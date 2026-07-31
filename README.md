@@ -55,6 +55,13 @@ flutter pub get
 flutter run
 ```
 
+### Download test APK (GitHub Actions)
+
+1. Open **Actions** → **Build APK** on the repo
+2. Open the latest successful run (or click **Run workflow**)
+3. Download the **LudoArena-APK** artifact
+4. Unzip and install `LudoArena-*.apk` on your Android device (enable Install unknown apps)
+
 Package ID: `com.ludoarena.app` · Min SDK 24
 
 See [PLAY_STORE_CHECKLIST.md](PLAY_STORE_CHECKLIST.md) and [PRIVACY.md](PRIVACY.md) before publishing.
