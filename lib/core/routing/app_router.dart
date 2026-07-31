@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ludo_arena/core/routing/app_routes.dart';
-import 'package:ludo_arena/features/game/game_placeholder_screen.dart';
+import 'package:ludo_arena/features/game/gameplay_screen.dart';
 import 'package:ludo_arena/features/game/mode_screen.dart';
 import 'package:ludo_arena/features/game/result_placeholder_screen.dart';
 import 'package:ludo_arena/features/game/rules_screen.dart';
@@ -42,7 +42,7 @@ GoRouter createAppRouter() {
         path: AppRoutes.game,
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? 'local';
-          return GamePlaceholderScreen(gameId: id);
+          return GameplayScreen(gameId: id);
         },
       ),
       GoRoute(
