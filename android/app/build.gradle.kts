@@ -46,3 +46,9 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // google_mobile_ads pulls an old WorkManager that crashes on AGP 9 / Android 15+
+    // See: https://github.com/googleads/googleads-mobile-flutter/issues/1444
+    implementation("androidx.work:work-runtime:2.11.2")
+}

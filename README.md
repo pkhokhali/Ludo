@@ -61,7 +61,8 @@ flutter run
 2. Wait for a **green** check (not the red failed run)
 3. Scroll to **Artifacts** at the bottom of the run summary
 4. Download **LudoArena-APK** (a `.zip`) — **not** the job logs
-5. Unzip and install `LudoArena-*.apk` on your phone (enable Install unknown apps)
+5. Unzip and install **`LudoArena-*-debug.apk`** first (recommended for testing)
+6. Uninstall any older Ludo Arena build before installing
 
 Package ID: `com.ludoarena.app` · Min SDK 24
 
