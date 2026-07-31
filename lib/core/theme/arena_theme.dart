@@ -19,8 +19,14 @@ ThemeData buildArenaTheme({ArenaThemeId themeId = ArenaThemeId.classic}) {
     onError: ArenaColors.textPrimary,
   );
 
-  final display = GoogleFonts.cinzelTextTheme();
-  final body = GoogleFonts.outfitTextTheme();
+  final base = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: colorScheme,
+  ).textTheme;
+
+  final display = _safeTextTheme(() => GoogleFonts.cinzelTextTheme(base), base);
+  final body = _safeTextTheme(() => GoogleFonts.outfitTextTheme(base), base);
 
   final textTheme = TextTheme(
     displayLarge: display.displayLarge?.copyWith(
@@ -89,10 +95,17 @@ ThemeData buildArenaTheme({ArenaThemeId themeId = ArenaThemeId.classic}) {
         shadowColor: accent.withValues(alpha: 0.5),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        textStyle: GoogleFonts.outfit(
-          fontWeight: FontWeight.w700,
-          fontSize: 16,
-          letterSpacing: 0.3,
+        textStyle: _safeTextStyle(
+          () => GoogleFonts.outfit(
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+            letterSpacing: 0.3,
+          ),
+          const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+            letterSpacing: 0.3,
+          ),
         ),
       ),
     ),
@@ -111,9 +124,28 @@ ThemeData buildArenaTheme({ArenaThemeId themeId = ArenaThemeId.classic}) {
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: ArenaColors.surface,
-      contentTextStyle: GoogleFonts.outfit(color: ArenaColors.textPrimary),
+      contentTextStyle: _safeTextStyle(
+        () => GoogleFonts.outfit(color: ArenaColors.textPrimary),
+        const TextStyle(color: ArenaColors.textPrimary),
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       behavior: SnackBarBehavior.floating,
     ),
   );
+}
+
+TextTheme _safeTextTheme(TextTheme Function() build, TextTheme fallback) {
+  try {
+    return build();
+  } catch (_) {
+    return fallback;
+  }
+}
+
+TextStyle _safeTextStyle(TextStyle Function() build, TextStyle fallback) {
+  try {
+    return build();
+  } catch (_) {
+    return fallback;
+  }
 }

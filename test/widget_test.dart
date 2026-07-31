@@ -1,4 +1,7 @@
+import 'dart:ui' show Size;
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +14,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
+    // CI has no font CDN access; avoid runtime Google Fonts fetches.
+    GoogleFonts.config.allowRuntimeFetching = false;
+
     Hive.init('widget_test_hive');
     for (final name in [
       HiveBoxes.settings,
@@ -25,6 +31,10 @@ void main() {
   });
 
   testWidgets('Ludo Arena boots to splash then home', (tester) async {
+    // Phone-like surface avoids wide desktop overflow in CI defaults.
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
 
@@ -38,12 +48,21 @@ void main() {
       ),
     );
 
-    expect(find.text('Ludo Arena'), findsOneWidget);
-    expect(find.text('The Next Generation Ludo Experience'), findsOneWidget);
+    // Splash brand is rendered uppercase for hero typography.
+    expect(
+      find.text(AppConstants.appName.toUpperCase()),
+      findsOneWidget,
+    );
+    expect(find.text(AppConstants.tagline), findsOneWidget);
 
-    await tester.pump(const Duration(milliseconds: 2300));
-    await tester.pumpAndSettle();
+    // Advance past splash delay without pumpAndSettle (avoids animation hangs).
+    await tester.pump(
+      const Duration(milliseconds: AnimationDurations.splashMs),
+    );
+    await tester.pump(); // start route transition
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Play Now'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
   });
 }

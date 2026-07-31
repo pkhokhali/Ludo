@@ -78,119 +78,146 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const Spacer(),
                     IconButton(
                       onPressed: () => context.push(AppRoutes.settings),
-                      icon: const Icon(Icons.settings_rounded,
-                          color: ArenaColors.gold),
+                      icon: const Icon(
+                        Icons.settings_rounded,
+                        color: ArenaColors.gold,
+                      ),
                     ),
                   ],
                 ),
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const ArenaBrandMark(size: 96)
-                          .animate()
-                          .fadeIn(duration: 450.ms)
-                          .scale(begin: const Offset(0.85, 0.85)),
-                      const SizedBox(height: 18),
-                      Text(
-                        AppConstants.appName.toUpperCase(),
-                        textAlign: TextAlign.center,
-                        style:
-                            Theme.of(context).textTheme.displayLarge?.copyWith(
-                                  color: ArenaColors.goldLight,
-                                  fontSize: 34,
-                                  letterSpacing: 2.2,
-                                ),
-                      ).animate().fadeIn(delay: 120.ms, duration: 450.ms),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppConstants.tagline,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ).animate().fadeIn(delay: 200.ms, duration: 450.ms),
-                      const SizedBox(height: 28),
-                      PremiumButton(
-                        label: 'Play Now',
-                        icon: Icons.play_arrow_rounded,
-                        onPressed: () => context.push(AppRoutes.mode),
-                      )
-                          .animate()
-                          .fadeIn(delay: 280.ms, duration: 400.ms)
-                          .slideY(begin: 0.12, end: 0),
-                      if (hasResume) ...[
-                        const SizedBox(height: 10),
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            final ok = await ref
-                                .read(gameControllerProvider.notifier)
-                                .resume();
-                            if (ok && context.mounted) {
-                              context.go(AppRoutes.gamePath('resume'));
-                            }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: ArenaColors.goldLight,
-                            side: BorderSide(
-                              color: ArenaColors.gold.withValues(alpha: 0.55),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 12,
-                            ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final compact = constraints.maxHeight < 520;
+                      final markSize = compact ? 72.0 : 96.0;
+                      final titleSize = compact ? 28.0 : 34.0;
+                      final tileAspect = compact ? 1.8 : 1.55;
+
+                      return SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
                           ),
-                          icon: const Icon(Icons.replay_rounded),
-                          label: const Text('Resume Last Game'),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(height: compact ? 8 : 16),
+                              ArenaBrandMark(size: markSize)
+                                  .animate()
+                                  .fadeIn(duration: 450.ms)
+                                  .scale(begin: const Offset(0.85, 0.85)),
+                              SizedBox(height: compact ? 12 : 18),
+                              Text(
+                                AppConstants.appName.toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .displayLarge
+                                    ?.copyWith(
+                                      color: ArenaColors.goldLight,
+                                      fontSize: titleSize,
+                                      letterSpacing: 2.2,
+                                    ),
+                              ).animate().fadeIn(
+                                    delay: 120.ms,
+                                    duration: 450.ms,
+                                  ),
+                              const SizedBox(height: 8),
+                              Text(
+                                AppConstants.tagline,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ).animate().fadeIn(
+                                    delay: 200.ms,
+                                    duration: 450.ms,
+                                  ),
+                              SizedBox(height: compact ? 18 : 28),
+                              PremiumButton(
+                                label: 'Play Now',
+                                icon: Icons.play_arrow_rounded,
+                                onPressed: () => context.push(AppRoutes.mode),
+                              )
+                                  .animate()
+                                  .fadeIn(delay: 280.ms, duration: 400.ms)
+                                  .slideY(begin: 0.12, end: 0),
+                              if (hasResume) ...[
+                                const SizedBox(height: 10),
+                                OutlinedButton.icon(
+                                  onPressed: () async {
+                                    final ok = await ref
+                                        .read(gameControllerProvider.notifier)
+                                        .resume();
+                                    if (ok && context.mounted) {
+                                      context.go(AppRoutes.gamePath('resume'));
+                                    }
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: ArenaColors.goldLight,
+                                    side: BorderSide(
+                                      color: ArenaColors.gold
+                                          .withValues(alpha: 0.55),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.replay_rounded),
+                                  label: const Text('Resume Last Game'),
+                                ),
+                              ],
+                              SizedBox(height: compact ? 16 : 24),
+                              GridView.count(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 10,
+                                crossAxisSpacing: 10,
+                                childAspectRatio: tileAspect,
+                                children: [
+                                  _HomeTile(
+                                    icon: Icons.person_rounded,
+                                    label: 'Profile',
+                                    delayMs: 0,
+                                    onTap: () =>
+                                        context.push(AppRoutes.profile),
+                                  ),
+                                  _HomeTile(
+                                    icon: Icons.bar_chart_rounded,
+                                    label: 'Statistics',
+                                    delayMs: 60,
+                                    onTap: () =>
+                                        context.push(AppRoutes.statistics),
+                                  ),
+                                  _HomeTile(
+                                    icon: Icons.emoji_events_outlined,
+                                    label: 'Achievements',
+                                    delayMs: 120,
+                                    onTap: () =>
+                                        context.push(AppRoutes.achievements),
+                                  ),
+                                  _HomeTile(
+                                    icon: Icons.help_outline_rounded,
+                                    label: 'Help',
+                                    delayMs: 180,
+                                    onTap: () => context.push(AppRoutes.help),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                          ),
                         ),
-                      ],
-                    ],
+                      );
+                    },
                   ),
                 ),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1.55,
-                  children: [
-                    _HomeTile(
-                      icon: Icons.person_rounded,
-                      label: 'Profile',
-                      delayMs: 0,
-                      onTap: () => context.push(AppRoutes.profile),
-                    ),
-                    _HomeTile(
-                      icon: Icons.bar_chart_rounded,
-                      label: 'Statistics',
-                      delayMs: 60,
-                      onTap: () => context.push(AppRoutes.statistics),
-                    ),
-                    _HomeTile(
-                      icon: Icons.emoji_events_outlined,
-                      label: 'Achievements',
-                      delayMs: 120,
-                      onTap: () => context.push(AppRoutes.achievements),
-                    ),
-                    _HomeTile(
-                      icon: Icons.help_outline_rounded,
-                      label: 'Help',
-                      delayMs: 180,
-                      onTap: () => context.push(AppRoutes.help),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
                 SizedBox(
                   height: 50,
                   child: _banner != null
                       ? AdWidget(ad: _banner!)
-                      : Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            ' ',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ),
+                      : const SizedBox.shrink(),
                 ),
               ],
             ),

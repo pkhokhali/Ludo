@@ -29,8 +29,13 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          # Pin to avoid surprise breakages when stable moves.
+          flutter-version: '3.44.8'
           channel: stable
           cache: true
+
+      - name: Flutter doctor
+        run: flutter doctor -v
 
       - name: Install dependencies
         run: flutter pub get
@@ -39,7 +44,7 @@ jobs:
         run: flutter analyze --no-fatal-infos
 
       - name: Run tests
-        run: flutter test
+        run: flutter test --reporter expanded
 
       - name: Build debug APK (sideload testing)
         # Debug APK avoids release-only AdMob/WorkManager startup crashes on AGP 9.
