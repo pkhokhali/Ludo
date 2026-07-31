@@ -1,12 +1,14 @@
 {
-  "_comment": "Default RuleConfig — engines read this at runtime (Module 1–3). Do not hardcode rules in Dart.",
   "classic": {
     "unlockRoll": 6,
     "extraTurnOnSix": true,
     "threeSixesRule": true,
     "exactFinish": true,
     "captureEnabled": true,
-    "safeCells": [1, 9, 14, 22, 27, 35, 40, 48]
+    "safeCells": [1, 9, 14, 22, 27, 35, 40, 48],
+    "mainPathLength": 52,
+    "homeStretchLength": 5,
+    "maxConsecutiveSixes": 3
   },
   "power": {
     "enabled": true,
