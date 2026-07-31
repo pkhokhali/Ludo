@@ -5,7 +5,6 @@ import 'package:ludo_arena/engine/rule_engine/rule_config_repository.dart';
 import 'package:ludo_arena/models/enums.dart';
 import 'package:ludo_arena/models/game_config.dart';
 import 'package:ludo_arena/models/game_state.dart';
-import 'package:ludo_arena/models/token.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
