@@ -14,6 +14,8 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      # Pin npm to match lockfile generation (avoids npm 11 vs 10 ci mismatches).
+      - run: npm install -g npm@10.9.8
       - run: npm ci
       - run: npm test
       - run: npm run typecheck
