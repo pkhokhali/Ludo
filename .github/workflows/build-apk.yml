@@ -1,0 +1,56 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build-debug-apk:
+    name: Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Pin npm 10
+        run: npm install -g npm@10.9.8
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Prebuild native Android project
+        run: npx expo prebuild --platform android --non-interactive --no-install
+        env:
+          EXPO_NO_TELEMETRY: 1
+
+      - name: Build debug APK
+        working-directory: android
+        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+        env:
+          ORG_GRADLE_PROJECT_reactNativeArchitectures: armeabi-v7a,arm64-v8a
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ludo-arena-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14

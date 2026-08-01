@@ -23,6 +23,14 @@ npm test
 npm run typecheck
 ```
 
+## Debug APK (GitHub Actions)
+
+On every push to `main` (or via **Actions → Build APK → Run workflow**), CI builds a debug APK and uploads it as an artifact:
+
+1. Open the **Build APK** workflow run
+2. Scroll to **Artifacts**
+3. Download **ludo-arena-debug-apk**
+
 ## App id
 
 `com.ludoarena.app` · version `1.0.2`
