@@ -14,7 +14,7 @@ import {
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
@@ -22,10 +22,10 @@ import { colors } from '@/src/theme';
 
 export { ErrorBoundary } from 'expo-router';
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Orbitron_600SemiBold,
     Orbitron_700Bold,
     Rajdhani_600SemiBold,
@@ -34,16 +34,24 @@ export default function RootLayout() {
     DMSans_500Medium,
     DMSans_700Bold,
   });
+  const [bootReady, setBootReady] = useState(false);
+
+  // Never block forever on fonts (offline / slow device).
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      setBootReady(true);
+      return;
+    }
+    const t = setTimeout(() => setBootReady(true), 2500);
+    return () => clearTimeout(t);
+  }, [fontsLoaded, fontError]);
 
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    if (!bootReady) return;
+    SplashScreen.hideAsync().catch(() => undefined);
+  }, [bootReady]);
 
-  useEffect(() => {
-    if (loaded) SplashScreen.hideAsync();
-  }, [loaded]);
-
-  if (!loaded) return null;
+  if (!bootReady) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>

@@ -29,7 +29,14 @@ On every push to `main` (or via **Actions → Build APK → Run workflow**), CI 
 
 1. Open the **Build APK** workflow run
 2. Scroll to **Artifacts**
-3. Download **ludo-arena-debug-apk**
+3. Download **ludo-arena-apk**
+
+Local standalone APK (embeds JS — no Metro required):
+
+```bash
+cd android
+.\gradlew assembleDebug
+```
 
 ## App id
 

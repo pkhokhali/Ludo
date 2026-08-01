@@ -35,7 +35,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#050814"
         }
-      ]
+      ],
+      "./plugins/withBundleInDebug.js"
     ],
     "experiments": {
       "typedRoutes": true

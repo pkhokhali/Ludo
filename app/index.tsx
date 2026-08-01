@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useRootNavigationState, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -12,22 +12,48 @@ import { APP_VERSION, ArenaAssets } from '@/src/constants/assets';
 import { ViewfinderCorners } from '@/src/components/ui';
 import { colors, fonts, spacing } from '@/src/theme';
 
+const SPLASH_MS = 2200;
+
 export default function SplashScreen() {
   const router = useRouter();
+  const nav = useRootNavigationState();
   const progress = useRef(new Animated.Value(0.08)).current;
   const [pct, setPct] = useState(0.08);
+  const navigated = useRef(false);
+
+  const goHome = () => {
+    if (navigated.current) return;
+    if (!nav?.key) return;
+    navigated.current = true;
+    router.replace('/home');
+  };
 
   useEffect(() => {
     const id = progress.addListener(({ value }) => setPct(value));
     Animated.timing(progress, {
       toValue: 1,
-      duration: 2800,
+      duration: SPLASH_MS,
       useNativeDriver: false,
-    }).start(({ finished }) => {
-      if (finished) router.replace('/home');
-    });
-    return () => progress.removeListener(id);
-  }, [progress, router]);
+    }).start();
+
+    // Hard navigation fallback — don't rely on animation `finished`
+    // (can be false on remount / interrupted timing).
+    const timer = setTimeout(goHome, SPLASH_MS + 150);
+
+    return () => {
+      progress.removeListener(id);
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progress]);
+
+  // If navigation becomes ready after the timer already fired, leave splash.
+  useEffect(() => {
+    if (!nav?.key || navigated.current) return;
+    const timer = setTimeout(goHome, SPLASH_MS + 150);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nav?.key]);
 
   return (
     <View style={styles.root}>
