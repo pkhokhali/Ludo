@@ -1,75 +1,32 @@
 # Ludo Arena
 
-**The Next Generation Ludo Experience**
+Professional arena-style Ludo built with **Expo (React Native)** + TypeScript.
 
-Production-quality offline Ludo for Android (Phase 1), with LAN multiplayer planned for Phase 2.
+## Stack
 
-## Tech Stack
+- Expo Router navigation
+- Zustand session / prefs / profile stores
+- Reanimated motion + Arena design system (Orbitron / Rajdhani / DM Sans)
+- Pure TypeScript classic game engine + weighted AI
 
-- Flutter (stable) + Dart
-- Riverpod · Go Router · Hive · SharedPreferences
-- flutter_animate · Lottie · Rive · just_audio
-- Google Mobile Ads (AdMob)
-
-## Architecture
-
-Clean Architecture with modular engines:
-
-| Engine | Responsibility |
-|--------|----------------|
-| Rule Engine | Configurable Classic + Power rules (no hardcoding) |
-| Game Engine | Turn loop, dice, moves, win detection |
-| AI Engine | Easy → Expert strategies |
-| Animation Engine | GameEvent → SFX / haptics |
-
-LAN (Phase 2) reuses the same engines via a host-authoritative network adapter.
-
-## Phase 1 Scope (v1.0)
-
-- Classic + Power modes, AI Match, Pass & Play
-- Profile, Statistics, Achievements, Settings, Help, About
-- AdMob banners + interstitials (never during gameplay)
-- Auto-save / resume last match
-- Shop / Daily Reward / Lucky Spin → **v1.1**
-
-## Module Build Status
-
-- [x] Module 0 — Project foundation
-- [x] Module 1 — Domain models & RuleConfig
-- [x] Module 2 — Rule Engine (Classic)
-- [x] Module 3 — Rule Engine (Power)
-- [x] Module 4 — Game Engine
-- [x] Module 5 — AI Engine
-- [x] Module 6 — UI shell polish
-- [x] Module 7 — Board, tokens, floor dice
-- [x] Module 8 — Animations, audio, haptics
-- [x] Module 9 — Profile / stats / achievements
-- [x] Module 10 — Save / resume
-- [x] Module 11 — AdMob
-- [x] Module 12 — Play Store polish
-
-## Getting Started
+## Run
 
 ```bash
-flutter pub get
-flutter run
+npm install
+npm start
 ```
 
-### Download test APK (GitHub Actions)
+Then open Android emulator, iOS simulator, or Expo Go.
 
-1. Open **Actions** → **Build APK** on the repo
-2. Wait for a **green** check (not the red failed run)
-3. Scroll to **Artifacts** at the bottom of the run summary
-4. Download **LudoArena-APK** (a `.zip`) — **not** the job logs
-5. Unzip and install **`LudoArena-*-debug.apk`** first (recommended for testing)
-6. Uninstall any older Ludo Arena build before installing
+```bash
+npm test
+npm run typecheck
+```
 
-Package ID: `com.ludoarena.app` · Min SDK 24
+## App id
 
-See [PLAY_STORE_CHECKLIST.md](PLAY_STORE_CHECKLIST.md) and [PRIVACY.md](PRIVACY.md) before publishing.
+`com.ludoarena.app` · version `1.0.2`
 
-## Design Notes
+## Design
 
-- Glossy 3D peg tokens (reference-matched)
-- Dice rolls **on the board floor** (physics bounce), not a static button
-- Dark navy + gold premium UI (Cyber Neon theme toggle in Settings)
+Navy / cyan Arena Mode chrome, cream board with engine-aligned seats (red BL, blue TL, green TR, yellow BR), cream/red dice assets under `assets/images/`.

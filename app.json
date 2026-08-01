@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Ludo Arena",
+    "slug": "ludo-arena",
+    "version": "1.0.2",
+    "orientation": "portrait",
+    "icon": "./assets/images/ludo_logo.png",
+    "scheme": "ludoarena",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ludoarena.app"
+    },
+    "android": {
+      "package": "com.ludoarena.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#050814",
+        "foregroundImage": "./assets/images/ludo_logo.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/ludo_logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/ludo_logo.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#050814"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+export { colors } from './colors';
+export type { SeatColor } from './colors';
+export { spacing, radii } from './spacing';
+export { fonts, type } from './typography';
