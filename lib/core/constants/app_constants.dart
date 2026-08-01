@@ -14,7 +14,7 @@ abstract final class AppConstants {
 
 /// Animation duration tokens (milliseconds).
 abstract final class AnimationDurations {
-  static const int splashMs = 2200;
+  static const int splashMs = 3200;
   static const int pageTransitionMs = 350;
   static const int tokenMoveMs = 280;
   static const int tokenBounceMs = 120;
@@ -42,4 +42,7 @@ abstract final class PrefKeys {
   static const String interstitialEveryN = 'interstitial_every_n';
   static const String matchesSinceLastAd = 'matches_since_last_ad';
   static const String onboardingDone = 'onboarding_done';
+  static const String diceRollingStyle = 'dice_rolling_style';
+  static const String coinMoveSpeed = 'coin_move_speed';
+  static const String continuousRolling = 'continuous_rolling';
 }

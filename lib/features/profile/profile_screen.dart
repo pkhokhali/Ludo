@@ -13,12 +13,10 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileRepositoryProvider).load();
     final xpNeed = profile.level * 100;
-    final topPad = MediaQuery.paddingOf(context).top + kToolbarHeight + 12;
-
     return ArenaScaffold(
       title: 'Profile',
       body: ListView(
-        padding: EdgeInsets.fromLTRB(20, topPad, 20, 24),
+        padding: EdgeInsets.zero,
         children: [
           GlassCard(
             glowColor: ArenaColors.gold,

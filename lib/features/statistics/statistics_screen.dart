@@ -28,12 +28,10 @@ class StatisticsScreen extends ConsumerWidget {
       (Icons.palette_outlined, 'Favorite Theme', s.favoriteThemeId),
     ];
 
-    final topPad = MediaQuery.paddingOf(context).top + kToolbarHeight + 12;
-
     return ArenaScaffold(
       title: 'Statistics',
       body: ListView(
-        padding: EdgeInsets.fromLTRB(20, topPad, 20, 24),
+        padding: EdgeInsets.zero,
         children: [
           GlassCard(
             glowColor: ArenaColors.gold,

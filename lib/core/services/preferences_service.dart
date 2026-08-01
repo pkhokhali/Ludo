@@ -46,4 +46,24 @@ class PreferencesService {
 
   Future<void> incrementMatchesSinceLastAd() =>
       setMatchesSinceLastAd(matchesSinceLastAd + 1);
+
+  /// `touch` | `fling`
+  String get diceRollingStyle =>
+      _prefs.getString(PrefKeys.diceRollingStyle) ?? 'touch';
+
+  Future<void> setDiceRollingStyle(String v) =>
+      _prefs.setString(PrefKeys.diceRollingStyle, v);
+
+  /// 0.0 (slow) … 1.0 (fast)
+  double get coinMoveSpeed =>
+      _prefs.getDouble(PrefKeys.coinMoveSpeed) ?? 0.45;
+
+  Future<void> setCoinMoveSpeed(double v) =>
+      _prefs.setDouble(PrefKeys.coinMoveSpeed, v.clamp(0.0, 1.0));
+
+  bool get continuousRolling =>
+      _prefs.getBool(PrefKeys.continuousRolling) ?? true;
+
+  Future<void> setContinuousRolling(bool v) =>
+      _prefs.setBool(PrefKeys.continuousRolling, v);
 }

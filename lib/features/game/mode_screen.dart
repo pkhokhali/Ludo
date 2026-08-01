@@ -53,12 +53,7 @@ class ModeScreen extends StatelessWidget {
     return ArenaScaffold(
       title: 'Game Mode',
       body: ListView.separated(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          MediaQuery.paddingOf(context).top + kToolbarHeight + 12,
-          20,
-          24,
-        ),
+        padding: EdgeInsets.zero,
         itemCount: modes.length,
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {

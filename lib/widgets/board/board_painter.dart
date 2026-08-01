@@ -108,11 +108,15 @@ class BoardPainter extends CustomPainter {
 
   void _drawHomes(Canvas canvas, double s) {
     final cell = s / BoardLayout.grid;
+    // Engine-aligned yards: red BL, blue TL, green TR, yellow BR.
     final homes = {
-      PlayerSeat.red: Rect.fromLTWH(cell, cell * 9, cell * 5, cell * 5),
-      PlayerSeat.blue: Rect.fromLTWH(cell, cell, cell * 5, cell * 5),
-      PlayerSeat.yellow: Rect.fromLTWH(cell * 9, cell, cell * 5, cell * 5),
-      PlayerSeat.green: Rect.fromLTWH(cell * 9, cell * 9, cell * 5, cell * 5),
+      for (final seat in PlayerSeat.values)
+        seat: Rect.fromLTWH(
+          BoardLayout.yardOrigin(seat).dx * cell,
+          BoardLayout.yardOrigin(seat).dy * cell,
+          cell * 5,
+          cell * 5,
+        ),
     };
 
     for (final e in homes.entries) {
@@ -324,7 +328,7 @@ class BoardPainter extends CustomPainter {
         ],
       ),
       (
-        PlayerSeat.yellow,
+        PlayerSeat.green,
         [
           c,
           Offset(c.dx - cell * 1.5, c.dy - cell * 1.5),
@@ -332,7 +336,7 @@ class BoardPainter extends CustomPainter {
         ],
       ),
       (
-        PlayerSeat.green,
+        PlayerSeat.yellow,
         [
           c,
           Offset(c.dx + cell * 1.5, c.dy - cell * 1.5),
@@ -396,10 +400,10 @@ class BoardPainter extends CustomPainter {
   void _drawStartArrows(Canvas canvas, double s) {
     final cell = s / BoardLayout.grid;
     final arrows = <(PlayerSeat, Offset, double)>[
-      (PlayerSeat.red, const Offset(6, 13), -math.pi / 2),
-      (PlayerSeat.blue, const Offset(1, 6), 0),
-      (PlayerSeat.green, const Offset(8, 1), math.pi / 2),
-      (PlayerSeat.yellow, const Offset(13, 8), math.pi),
+      (PlayerSeat.red, const Offset(6, 13), -math.pi / 2), // up
+      (PlayerSeat.blue, const Offset(1, 6), 0), // right
+      (PlayerSeat.green, const Offset(8, 1), math.pi / 2), // down
+      (PlayerSeat.yellow, const Offset(14, 10), math.pi / 2), // down
     ];
 
     for (final a in arrows) {

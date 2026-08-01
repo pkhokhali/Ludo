@@ -12,12 +12,10 @@ class AchievementsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(achievementsRepositoryProvider).all();
-    final topPad = MediaQuery.paddingOf(context).top + kToolbarHeight + 12;
-
     return ArenaScaffold(
       title: 'Achievements',
       body: ListView.separated(
-        padding: EdgeInsets.fromLTRB(20, topPad, 20, 24),
+        padding: EdgeInsets.zero,
         itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(height: 10),
         itemBuilder: (context, i) {

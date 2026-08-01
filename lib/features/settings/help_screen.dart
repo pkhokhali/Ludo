@@ -9,12 +9,10 @@ class HelpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final topPad = MediaQuery.paddingOf(context).top + kToolbarHeight + 12;
-
     return ArenaScaffold(
       title: 'Help',
       body: ListView(
-        padding: EdgeInsets.fromLTRB(20, topPad, 20, 24),
+        padding: EdgeInsets.zero,
         children: [
           GlassCard(
             glowColor: ArenaColors.gold,

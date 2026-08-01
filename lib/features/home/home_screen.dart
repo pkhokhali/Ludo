@@ -58,8 +58,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: ArenaBackground(
         cyber: cyber,
         child: SafeArea(
+          minimum: const EdgeInsets.only(bottom: 8),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

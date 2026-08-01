@@ -57,10 +57,10 @@ void main() {
 
     // Advance past splash delay without pumpAndSettle (avoids animation hangs).
     await tester.pump(
-      const Duration(milliseconds: AnimationDurations.splashMs),
+      const Duration(milliseconds: AnimationDurations.splashMs + 50),
     );
     await tester.pump(); // start route transition
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Play Now'), findsOneWidget);
     expect(find.text('Profile'), findsOneWidget);

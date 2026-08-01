@@ -116,6 +116,7 @@ class _GameplayScreenState extends ConsumerState<GameplayScreen>
       body: ArenaBackground(
         cyber: cyber,
         child: SafeArea(
+          minimum: const EdgeInsets.only(bottom: 10),
           child: Column(
             children: [
               Padding(
