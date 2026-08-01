@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ludo_arena/core/constants/arena_assets.dart';
 import 'package:ludo_arena/core/routing/app_routes.dart';
 import 'package:ludo_arena/core/services/providers.dart';
 import 'package:ludo_arena/core/theme/arena_colors.dart';
@@ -28,31 +29,50 @@ class SettingsScreen extends ConsumerWidget {
               padding: EdgeInsets.zero,
               children: [
                 Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 22,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF2E7D32), Color(0xFF1B5E20)],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF2E7D32).withValues(alpha: 0.4),
-                          blurRadius: 12,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        ArenaAssets.settingsGear,
+                        width: 36,
+                        height: 36,
+                        filterQuality: FilterQuality.high,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.settings_rounded,
+                          color: ArenaColors.gold,
+                          size: 32,
                         ),
-                      ],
-                    ),
-                    child: Text(
-                      'SETTINGS',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.4,
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 22,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(22),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF2E7D32), Color(0xFF1B5E20)],
                           ),
-                    ),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  const Color(0xFF2E7D32).withValues(alpha: 0.4),
+                              blurRadius: 12,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          'SETTINGS',
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.4,
+                                  ),
+                        ),
+                      ),
+                    ],
                   ),
                 ).animate().fadeIn(duration: 300.ms),
                 const SizedBox(height: 18),

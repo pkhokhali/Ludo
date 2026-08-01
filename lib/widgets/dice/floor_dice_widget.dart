@@ -1,10 +1,10 @@
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:ludo_arena/core/constants/arena_assets.dart';
 import 'package:ludo_arena/core/theme/arena_colors.dart';
 
-/// Wood + blue-pip die matching the Ludo Game Assets reference.
+/// Cream die with glossy red pips — design-pack faces.
 class FloorDiceWidget extends StatelessWidget {
   const FloorDiceWidget({
     super.key,
@@ -19,30 +19,55 @@ class FloorDiceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final face = value.clamp(1, 6);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 120),
       width: size,
       height: size,
       transform: rolling
           ? (Matrix4.identity()
-            ..rotateZ(0.32)
-            ..rotateX(0.35))
+            ..rotateZ(0.28)
+            ..rotateX(0.3))
           : Matrix4.identity(),
       transformAlignment: Alignment.center,
-      child: CustomPaint(
-        size: Size.square(size),
-        painter: WoodenDicePainter(
-          value: value.clamp(1, 6),
-          rolling: rolling,
-        ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (rolling)
+            Container(
+              width: size * 1.15,
+              height: size * 1.15,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: ArenaColors.gold.withValues(alpha: 0.45),
+                    blurRadius: size * 0.35,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+            ),
+          Image.asset(
+            ArenaAssets.diceFace(face),
+            width: size,
+            height: size,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+            errorBuilder: (_, _, _) => CustomPaint(
+              size: Size.square(size),
+              painter: CreamDicePainter(value: face, rolling: rolling),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Shared wood-grain die painter (floor die + HUD badge).
-class WoodenDicePainter extends CustomPainter {
-  WoodenDicePainter({
+/// Fallback cream + red-pip painter if assets fail to load.
+class CreamDicePainter extends CustomPainter {
+  CreamDicePainter({
     required this.value,
     this.rolling = false,
     this.showShadow = true,
@@ -52,235 +77,104 @@ class WoodenDicePainter extends CustomPainter {
   final bool rolling;
   final bool showShadow;
 
-  static const _woodLight = Color(0xFFE8C9A0);
-  static const _woodMid = Color(0xFFD4A574);
-  static const _woodDark = Color(0xFFB8895A);
-  static const _woodDeep = Color(0xFF8B6438);
-  static const _pipBlue = Color(0xFF2F6BFF);
-  static const _pipBlueDeep = Color(0xFF1A4FD6);
+  static const _face = Color(0xFFF7F1E6);
+  static const _faceDeep = Color(0xFFE8DFD0);
+  static const _rim = Color(0xFF2E221D);
+  static const _side = Color(0xFFC4A574);
+  static const _pip = Color(0xFFC1272D);
 
   @override
   void paint(Canvas canvas, Size size) {
     final s = size.shortestSide;
-    final radius = s * 0.28;
-    final rect = Rect.fromLTWH(0, 0, s, s);
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
+    final radius = s * 0.22;
+    final face = RRect.fromRectAndRadius(
+      Rect.fromLTWH(s * 0.04, s * 0.04, s * 0.88, s * 0.84),
+      Radius.circular(radius),
+    );
+    final body = RRect.fromRectAndRadius(
+      Rect.fromLTWH(s * 0.04, s * 0.08, s * 0.88, s * 0.86),
+      Radius.circular(radius),
+    );
 
     if (showShadow) {
       canvas.drawRRect(
-        rrect.shift(Offset(s * 0.06, s * 0.1)),
+        body.shift(Offset(s * 0.04, s * 0.06)),
         Paint()
-          ..color = Colors.black.withValues(alpha: 0.35)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, s * 0.08),
+          ..color = Colors.black.withValues(alpha: 0.28)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, s * 0.06),
       );
     }
 
-    if (rolling) {
-      canvas.drawRRect(
-        rrect.inflate(s * 0.04),
-        Paint()
-          ..color = ArenaColors.gold.withValues(alpha: 0.35)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, s * 0.12),
-      );
-    }
-
-    // Soft wood body
+    canvas.drawRRect(body, Paint()..color = _side);
     canvas.drawRRect(
-      rrect,
+      face,
       Paint()
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [_woodLight, _woodMid, _woodDark],
-          stops: [0.0, 0.45, 1.0],
-        ).createShader(rect),
+          colors: [Colors.white, _face, _faceDeep],
+        ).createShader(face.outerRect),
     );
-
-    _paintGrain(canvas, rrect, s);
-
-    // Edge rim / polish
     canvas.drawRRect(
-      rrect,
+      face,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = s * 0.03
-        ..shader = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.55),
-            _woodDeep.withValues(alpha: 0.35),
-            Colors.black.withValues(alpha: 0.2),
-          ],
-        ).createShader(rect),
+        ..strokeWidth = s * 0.035
+        ..color = _rim,
     );
 
-    // Top-left gloss
-    final gloss = Path()
-      ..addRRect(
-        RRect.fromRectAndCorners(
-          Rect.fromLTWH(s * 0.08, s * 0.08, s * 0.55, s * 0.38),
-          topLeft: Radius.circular(radius * 0.85),
-          topRight: Radius.circular(radius * 0.4),
-          bottomLeft: Radius.circular(radius * 0.4),
-          bottomRight: Radius.circular(s),
-        ),
-      );
-    canvas.drawPath(
-      gloss,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: 0.28),
-            Colors.white.withValues(alpha: 0.0),
-          ],
-        ).createShader(rect),
-    );
-
-    _paintPips(canvas, Size(s, s));
-  }
-
-  void _paintGrain(Canvas canvas, RRect clip, double s) {
-    canvas.save();
-    canvas.clipRRect(clip);
-
-    final rng = math.Random(7);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    for (var i = 0; i < 14; i++) {
-      final y = s * (0.08 + i * 0.065);
-      final wobble = (rng.nextDouble() - 0.5) * s * 0.04;
-      paint
-        ..strokeWidth = s * (0.008 + rng.nextDouble() * 0.012)
-        ..color = _woodDeep.withValues(alpha: 0.07 + rng.nextDouble() * 0.08);
-      final path = Path()
-        ..moveTo(-s * 0.05, y + wobble)
-        ..cubicTo(
-          s * 0.25,
-          y - s * 0.02 + wobble,
-          s * 0.55,
-          y + s * 0.025 - wobble,
-          s * 1.05,
-          y + wobble * 0.5,
-        );
-      canvas.drawPath(path, paint);
-    }
-
-    // Soft radial warmth
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, s, s),
-      Paint()
-        ..shader = RadialGradient(
-          center: const Alignment(-0.35, -0.4),
-          radius: 1.1,
-          colors: [
-            Colors.white.withValues(alpha: 0.14),
-            Colors.transparent,
-          ],
-        ).createShader(Rect.fromLTWH(0, 0, s, s)),
-    );
-
-    canvas.restore();
-  }
-
-  void _paintPips(Canvas canvas, Size size) {
-    final s = size.shortestSide;
     final cx = s / 2;
-    final cy = s / 2;
-    final r = s * 0.095;
-    final inset = s * 0.27;
-
+    final cy = s * 0.46;
+    final r = s * 0.09;
+    final inset = s * 0.28;
     final pips = switch (value) {
       1 => [Offset(cx, cy)],
-      2 => [
-          Offset(inset, inset),
-          Offset(s - inset, s - inset),
-        ],
+      2 => [Offset(inset, inset * 0.95), Offset(s - inset, s * 0.62)],
       3 => [
-          Offset(inset, inset),
+          Offset(inset, inset * 0.95),
           Offset(cx, cy),
-          Offset(s - inset, s - inset),
+          Offset(s - inset, s * 0.62),
         ],
       4 => [
-          Offset(inset, inset),
-          Offset(s - inset, inset),
-          Offset(inset, s - inset),
-          Offset(s - inset, s - inset),
+          Offset(inset, inset * 0.95),
+          Offset(s - inset, inset * 0.95),
+          Offset(inset, s * 0.62),
+          Offset(s - inset, s * 0.62),
         ],
       5 => [
-          Offset(inset, inset),
-          Offset(s - inset, inset),
+          Offset(inset, inset * 0.95),
+          Offset(s - inset, inset * 0.95),
           Offset(cx, cy),
-          Offset(inset, s - inset),
-          Offset(s - inset, s - inset),
+          Offset(inset, s * 0.62),
+          Offset(s - inset, s * 0.62),
         ],
       _ => [
-          Offset(inset, inset),
-          Offset(s - inset, inset),
+          Offset(inset, inset * 0.9),
+          Offset(s - inset, inset * 0.9),
           Offset(inset, cy),
           Offset(s - inset, cy),
-          Offset(inset, s - inset),
-          Offset(s - inset, s - inset),
+          Offset(inset, s * 0.64),
+          Offset(s - inset, s * 0.64),
         ],
     };
 
     for (final p in pips) {
-      _drawPip(canvas, p, r);
+      canvas.drawCircle(p, r, Paint()..color = _pip);
+      canvas.drawCircle(
+        p.translate(-r * 0.28, -r * 0.3),
+        r * 0.28,
+        Paint()..color = Colors.white.withValues(alpha: 0.85),
+      );
     }
   }
 
-  void _drawPip(Canvas canvas, Offset c, double r) {
-    // Recessed well
-    canvas.drawCircle(
-      c.translate(0, r * 0.12),
-      r * 1.05,
-      Paint()..color = Colors.black.withValues(alpha: 0.18),
-    );
-
-    canvas.drawCircle(
-      c,
-      r,
-      Paint()
-        ..shader = ui.Gradient.radial(
-          c.translate(-r * 0.25, -r * 0.3),
-          r * 1.3,
-          [
-            const Color(0xFF5B8CFF),
-            _pipBlue,
-            _pipBlueDeep,
-          ],
-          const [0.0, 0.45, 1.0],
-        ),
-    );
-
-    // Inner rim
-    canvas.drawCircle(
-      c,
-      r,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = r * 0.18
-        ..color = Colors.black.withValues(alpha: 0.18),
-    );
-
-    // Specular
-    canvas.drawCircle(
-      c.translate(-r * 0.28, -r * 0.32),
-      r * 0.28,
-      Paint()..color = Colors.white.withValues(alpha: 0.55),
-    );
-  }
-
   @override
-  bool shouldRepaint(covariant WoodenDicePainter oldDelegate) =>
-      oldDelegate.value != value ||
-      oldDelegate.rolling != rolling ||
-      oldDelegate.showShadow != showShadow;
+  bool shouldRepaint(covariant CreamDicePainter oldDelegate) =>
+      oldDelegate.value != value || oldDelegate.rolling != rolling;
 }
+
+/// Alias kept for HUD badge compatibility.
+typedef WoodenDicePainter = CreamDicePainter;
 
 /// Keyframed floor roll: arc + tumble + settle.
 class DiceRollController extends ChangeNotifier {

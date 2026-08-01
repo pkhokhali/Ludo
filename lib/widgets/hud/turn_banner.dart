@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ludo_arena/core/constants/arena_assets.dart';
 import 'package:ludo_arena/core/theme/arena_colors.dart';
 import 'package:ludo_arena/models/enums.dart';
 import 'package:ludo_arena/widgets/board/board_layout.dart';
@@ -77,7 +78,7 @@ class TurnBanner extends StatelessWidget {
   }
 }
 
-/// Compact wood dice face shown in the top HUD (not the floor die).
+/// Compact cream dice face shown in the top HUD (not the floor die).
 class DiceHudBadge extends StatelessWidget {
   const DiceHudBadge({super.key, this.value});
 
@@ -87,13 +88,16 @@ class DiceHudBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasValue = value != null;
     if (hasValue) {
+      final face = value!.clamp(1, 6);
       return SizedBox(
         width: 44,
         height: 44,
-        child: CustomPaint(
-          painter: WoodenDicePainter(
-            value: value!.clamp(1, 6),
-            showShadow: true,
+        child: Image.asset(
+          ArenaAssets.diceFace(face),
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+          errorBuilder: (_, _, _) => CustomPaint(
+            painter: CreamDicePainter(value: face, showShadow: true),
           ),
         ),
       );

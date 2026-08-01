@@ -1,51 +1,30 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ludo_arena/core/constants/app_constants.dart';
+import 'package:ludo_arena/core/constants/arena_assets.dart';
 import 'package:ludo_arena/core/routing/app_routes.dart';
-import 'package:ludo_arena/core/services/providers.dart';
 import 'package:ludo_arena/core/theme/arena_colors.dart';
-import 'package:ludo_arena/models/enums.dart';
-import 'package:ludo_arena/widgets/common/arena_background.dart';
-import 'package:ludo_arena/widgets/common/arena_brand_mark.dart';
-import 'package:ludo_arena/widgets/dice/floor_dice_widget.dart';
-import 'package:ludo_arena/widgets/token/token_widget.dart';
 
-/// Cinematic arena splash — dice tumble, tokens converge, brand reveal.
-class SplashScreen extends ConsumerStatefulWidget {
+/// Arena Mode splash — design-pack full-bleed art + loading bar.
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen>
-    with TickerProviderStateMixin {
-  late final AnimationController _pulse;
-  late final AnimationController _diceSpin;
-  int _diceFace = 6;
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _load;
 
   @override
   void initState() {
     super.initState();
-    _pulse = AnimationController(
+    _load = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
-    _diceSpin = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..repeat();
-    _diceSpin.addListener(() {
-      if (_diceSpin.value > 0.08 &&
-          (_diceSpin.value * 12).floor() !=
-              ((_diceSpin.value - 0.01) * 12).floor()) {
-        setState(() => _diceFace = 1 + math.Random().nextInt(6));
-      }
-    });
+      duration: const Duration(milliseconds: AnimationDurations.splashMs),
+    )..forward();
 
     Future<void>.delayed(
       const Duration(milliseconds: AnimationDurations.splashMs),
@@ -58,196 +37,113 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   void dispose() {
-    _pulse.dispose();
-    _diceSpin.dispose();
+    _load.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final cyber = ref.watch(themeIdProvider) == ArenaThemeId.cyberNeon;
-    final size = MediaQuery.sizeOf(context);
-
     return Scaffold(
-      body: ArenaBackground(
-        cyber: cyber,
-        child: SafeArea(
-          child: Stack(
-            children: [
-              // Soft spotlight
-              AnimatedBuilder(
-                animation: _pulse,
-                builder: (context, _) {
-                  final t = _pulse.value;
-                  return Center(
-                    child: Container(
-                      width: size.width * (0.55 + t * 0.08),
-                      height: size.width * (0.55 + t * 0.08),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            ArenaColors.gold.withValues(alpha: 0.18 + t * 0.08),
-                            Colors.transparent,
+      backgroundColor: const Color(0xFF050814),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            ArenaAssets.splash,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.high,
+            errorBuilder: (_, _, _) => const ColoredBox(color: Color(0xFF050814)),
+          ),
+          // Soft vignette so loading UI stays readable on any crop.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.transparent,
+                  Color(0xCC050814),
+                ],
+                stops: [0.0, 0.55, 1.0],
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(28, 16, 28, 24),
+              child: Column(
+                children: [
+                  Text(
+                    'ARENA MODE',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: const Color(0xFF00E5FF),
+                          letterSpacing: 4,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ).animate().fadeIn(duration: 400.ms),
+                  const Spacer(),
+                  Text(
+                    'LUDO',
+                    style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                          color: Colors.white,
+                          fontSize: 52,
+                          fontStyle: FontStyle.italic,
+                          letterSpacing: 4,
+                          shadows: const [
+                            Shadow(color: Color(0xFF00E5FF), blurRadius: 18),
                           ],
                         ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              // Orbiting seat tokens
-              ...List.generate(4, (i) {
-                final seat = PlayerSeat.values[i];
-                return _OrbitingToken(
-                  seat: seat,
-                  index: i,
-                  pulse: _pulse,
-                );
-              }),
-
-              // Main brand stack
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const ArenaBrandMark(size: 108)
-                        .animate()
-                        .fadeIn(duration: 500.ms)
-                        .scale(begin: const Offset(0.7, 0.7))
-                        .then()
-                        .shimmer(
-                          duration: 1200.ms,
-                          color: ArenaColors.goldLight.withValues(alpha: 0.4),
+                  ).animate().fadeIn(delay: 120.ms, duration: 500.ms),
+                  const SizedBox(height: 6),
+                  Text(
+                    'ROLL  •  RACE  •  RULE THE BOARD',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: ArenaColors.textPrimary,
+                          letterSpacing: 2.2,
+                          fontSize: 11,
                         ),
-                    const SizedBox(height: 22),
-                    Text(
-                      AppConstants.appName.toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            color: ArenaColors.goldLight,
-                            fontSize: 40,
-                            letterSpacing: 3.2,
-                          ),
-                    ).animate().fadeIn(delay: 180.ms, duration: 500.ms),
-                    const SizedBox(height: 8),
-                    Text(
-                      'ENTER THE ARENA',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: ArenaColors.gold,
-                            letterSpacing: 4,
-                            fontSize: 12,
-                          ),
-                    ).animate().fadeIn(delay: 320.ms, duration: 450.ms),
-                    const SizedBox(height: 28),
-                    // Rolling wood dice
-                    AnimatedBuilder(
-                      animation: _diceSpin,
-                      builder: (context, child) {
-                        final twist = math.sin(_diceSpin.value * math.pi * 2) * 0.45;
-                        return Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.identity()
-                            ..setEntry(3, 2, 0.002)
-                            ..rotateZ(twist)
-                            ..rotateX(_diceSpin.value * math.pi * 2),
-                          child: child,
-                        );
-                      },
-                      child: FloorDiceWidget(
-                        value: _diceFace,
-                        rolling: true,
-                        size: 64,
-                      ),
-                    )
-                        .animate()
-                        .fadeIn(delay: 200.ms, duration: 400.ms)
-                        .slideY(begin: 0.4, end: 0),
-                    const SizedBox(height: 18),
-                    Text(
-                      AppConstants.tagline,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ).animate().fadeIn(delay: 500.ms, duration: 500.ms),
-                  ],
-                ),
+                  ).animate().fadeIn(delay: 220.ms, duration: 450.ms),
+                  const SizedBox(height: 36),
+                  Text(
+                    'LOADING',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: ArenaColors.textSecondary,
+                          letterSpacing: 3,
+                          fontSize: 11,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  AnimatedBuilder(
+                    animation: _load,
+                    builder: (context, _) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: _load.value.clamp(0.05, 1.0),
+                          minHeight: 6,
+                          backgroundColor: const Color(0xFF1A2433),
+                          color: const Color(0xFF00E5FF),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'v 1.0.2',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: ArenaColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                  ),
+                ],
               ),
-
-              // Bottom loading bar
-              Positioned(
-                left: 48,
-                right: 48,
-                bottom: 28,
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: (
-                        const LinearProgressIndicator(
-                          minHeight: 4,
-                          backgroundColor: ArenaColors.surface,
-                          color: ArenaColors.gold,
-                        )
-                      )
-                          .animate(onPlay: (c) => c.repeat())
-                          .shimmer(
-                            duration: 1200.ms,
-                            color: ArenaColors.goldLight,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Loading match arena…',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontSize: 12,
-                          ),
-                    ),
-                  ],
-                ),
-              ).animate().fadeIn(delay: 400.ms),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
-    );
-  }
-}
-
-class _OrbitingToken extends StatelessWidget {
-  const _OrbitingToken({
-    required this.seat,
-    required this.index,
-    required this.pulse,
-  });
-
-  final PlayerSeat seat;
-  final int index;
-  final AnimationController pulse;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: pulse,
-      builder: (context, child) {
-        final size = MediaQuery.sizeOf(context);
-        final cx = size.width / 2;
-        final cy = size.height / 2 - 24;
-        final radius = math.min(size.width, size.height) * 0.34;
-        final angle =
-            (index * math.pi / 2) + pulse.value * math.pi * 0.35 - math.pi / 4;
-        final x = cx + radius * math.cos(angle) - 18;
-        final y = cy + radius * math.sin(angle) - 24;
-        return Positioned(
-          left: x,
-          top: y,
-          child: child!,
-        );
-      },
-      child: TokenWidget(seat: seat, size: 36)
-          .animate()
-          .fadeIn(delay: (120 * index).ms, duration: 450.ms)
-          .scale(begin: const Offset(0.4, 0.4)),
     );
   }
 }

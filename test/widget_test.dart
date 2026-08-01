@@ -48,12 +48,10 @@ void main() {
       ),
     );
 
-    // Splash brand is rendered uppercase for hero typography.
-    expect(
-      find.text(AppConstants.appName.toUpperCase()),
-      findsOneWidget,
-    );
-    expect(find.text(AppConstants.tagline), findsOneWidget);
+    // Arena Mode splash branding from the design pack.
+    expect(find.text('ARENA MODE'), findsOneWidget);
+    expect(find.text('LUDO'), findsOneWidget);
+    expect(find.text('LOADING'), findsOneWidget);
 
     // Advance past splash delay without pumpAndSettle (avoids animation hangs).
     await tester.pump(

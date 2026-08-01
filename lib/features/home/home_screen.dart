@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:ludo_arena/core/constants/app_constants.dart';
+import 'package:ludo_arena/core/constants/arena_assets.dart';
 import 'package:ludo_arena/core/routing/app_routes.dart';
 import 'package:ludo_arena/core/services/providers.dart';
 import 'package:ludo_arena/core/theme/arena_colors.dart';
@@ -79,9 +80,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const Spacer(),
                     IconButton(
                       onPressed: () => context.push(AppRoutes.settings),
-                      icon: const Icon(
-                        Icons.settings_rounded,
-                        color: ArenaColors.gold,
+                      tooltip: 'Settings',
+                      icon: Image.asset(
+                        ArenaAssets.settingsGear,
+                        width: 28,
+                        height: 28,
+                        filterQuality: FilterQuality.high,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.settings_rounded,
+                          color: ArenaColors.gold,
+                        ),
                       ),
                     ),
                   ],
